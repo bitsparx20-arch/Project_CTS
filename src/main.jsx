@@ -19,6 +19,5 @@ createRoot(document.getElementById("root")).render(
   <Route path="/tyres" element={<TiresPage />} />
 </Routes>
     </BrowserRouter>
-     {/* added a router  */}
   </StrictMode>
-// 
+);
