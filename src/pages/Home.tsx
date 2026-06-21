@@ -1,3 +1,4 @@
+import TyreFinder from "../components/TyreFinder";
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { BRANDS, ROUTES } from "../config/site";
@@ -72,35 +73,6 @@ function Hero() {
   );
 }
 
-function TireFinder() {
-  return (
-    <section className="finder-section">
-      <p className="section-label">Tire Finder</p>
-      <h2 className="section-heading">Find the Right Tyre for Your Car</h2>
-      <div className="finder-grid">
-        <select defaultValue="">
-          <option value="">Select Car Brand</option>
-          {carBrands.map((b) => <option key={b}>{b}</option>)}
-        </select>
-        <select defaultValue="">
-          <option value="">Select Model</option>
-          {carModels.map((m) => <option key={m}>{m}</option>)}
-        </select>
-        <select defaultValue="">
-          <option value="">Select Year</option>
-          {carYears.map((y) => <option key={y}>{y}</option>)}
-        </select>
-        <select defaultValue="">
-          <option value="">Tyre Size (Optional)</option>
-          {tireSizes.map((s) => <option key={s}>{s}</option>)}
-        </select>
-        <Link to={ROUTES.tyres} className="finder-search-btn">
-          Search Tyres →
-        </Link>
-      </div>
-    </section>
-  );
-}
 
 function Brands() {
   return (
@@ -243,7 +215,7 @@ export default function Home() {
   return (
     <>
       <Hero />
-      <TireFinder />
+      <TyreFinder />
       <Brands />
       <Categories />
       <WhyCTS />

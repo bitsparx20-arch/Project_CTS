@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation} from "react-router-dom";
 import { ROUTES } from "../config/site";
 
 const TireIcon = ({ color = "#1a1a1a" }: { color?: string }) => (
@@ -58,11 +58,24 @@ const TIRES: Tire[] = [
 type SortKey = "top" | "low" | "high" | "new";
 
 export default function Tyres() {
+  const location = useLocation();
+
+const selectedBrand = location.state?.brand;
+const selectedModel = location.state?.model;
+const selectedTyreBrand = location.state?.tyreBrand;
   const [sort, setSort] = useState<SortKey>("top");
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
 
   const sortedTires = useMemo(() => {
-    const copy = [...TIRES];
+  
+   const copy = [...TIRES].filter((tire) => {
+  if (!selectedTyreBrand) return true;
+
+  return (
+    tire.brand.toLowerCase().includes(selectedTyreBrand.toLowerCase()) ||
+    tire.model.toLowerCase().includes(selectedTyreBrand.toLowerCase())
+  );
+});
     switch (sort) {
       case "low":
         return copy.sort((a, b) => a.price - b.price);
