@@ -151,7 +151,7 @@ export default function TyreFinder() {
     })
   }
 >
-  Search Tyres →
+Search Tyres 
 </button>
       </div>
     </section>

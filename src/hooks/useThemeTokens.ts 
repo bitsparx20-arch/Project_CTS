@@ -1,0 +1,148 @@
+import { useTheme } from "../context/ThemeContext";
+
+/* ============================================================
+   CTS TYRES — Centralised theme-aware design tokens
+   All pages/components import from here instead of hardcoding
+   ============================================================ */
+
+export interface ThemeTokens {
+  // Base backgrounds
+  bg: string;
+  bg2: string;
+  bgPanel: string;
+  bgPanelT: string; // translucent panel
+
+  // Text
+  text: string;
+  textDim: string;
+  inkDark: string;  // dark ink for use on light bg sections
+
+  // Brand colours (constant across themes)
+  accent: string;       // CTS gold #F5A800
+  accentSoft: string;
+  accentGlow: string;
+  accentDim: string;
+
+  // Gradient strings
+  gradAccent: string;
+  gradMain: string;
+
+  // Silver tones
+  silver: string;
+  silverDark: string;
+
+  // Green
+  green: string;
+  greenBrt: string;
+  rust: string;
+
+  // Borders / hairlines
+  hairline: string;
+  border: string;
+  borderSolid: string;
+
+  // Surfaces
+  surface: string;    // cards / panels
+  surfaceHover: string;
+
+  // Semantic
+  void: string;       // deep near-black section bg
+  voidT: string;
+
+  // Scrollbar, selection
+  selectionBg: string;
+  selectionText: string;
+
+  // Boolean helpers
+  isDark: boolean;
+}
+
+export function useThemeTokens(): ThemeTokens {
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
+
+  if (isDark) {
+    return {
+      bg:           "#080808",
+      bg2:          "#111111",
+      bgPanel:      "rgba(12,11,8,0.85)",
+      bgPanelT:     "rgba(5,5,5,0.72)",
+
+      text:         "#FFFFFF",
+      textDim:      "#8A8A8A",
+      inkDark:      "#1A1A1A",
+
+      accent:       "#F5A800",
+      accentSoft:   "#FFB830",
+      accentGlow:   "rgba(245,168,0,0.40)",
+      accentDim:    "#A07A20",
+
+      gradAccent:   "linear-gradient(to right, #F5A800, #FFD060, #F5A800)",
+      gradMain:     "linear-gradient(135deg, #D4A843, #6BA84F)",
+
+      silver:       "#C8C8C8",
+      silverDark:   "#787878",
+
+      green:        "#3D5A2E",
+      greenBrt:     "#6BA84F",
+      rust:         "#B84A2C",
+
+      hairline:     "rgba(245,168,0,0.15)",
+      border:       "rgba(255,255,255,0.10)",
+      borderSolid:  "#2a2a2a",
+
+      surface:      "rgba(255,255,255,0.04)",
+      surfaceHover: "rgba(255,255,255,0.08)",
+
+      void:         "#080604",
+      voidT:        "rgba(8,6,4,0.88)",
+
+      selectionBg:  "#F5A800",
+      selectionText:"#0D0C08",
+
+      isDark: true,
+    };
+  }
+
+  // ─── Light theme ──────────────────────────────────────────
+  return {
+    bg:           "#F5F2EB",
+    bg2:          "#FFFFFF",
+    bgPanel:      "rgba(255,252,245,0.92)",
+    bgPanelT:     "rgba(240,236,228,0.80)",
+
+    text:         "#1A1A14",
+    textDim:      "#6B6550",
+    inkDark:      "#1A1A14",
+
+    accent:       "#C8880A",     // slightly deeper gold for contrast on light bg
+    accentSoft:   "#E09A10",
+    accentGlow:   "rgba(200,136,10,0.30)",
+    accentDim:    "#96600A",
+
+    gradAccent:   "linear-gradient(to right, #C8880A, #E8A820, #C8880A)",
+    gradMain:     "linear-gradient(135deg, #B8760A, #4D8B31)",
+
+    silver:       "#888888",
+    silverDark:   "#555555",
+
+    green:        "#3D5A2E",
+    greenBrt:     "#4D8B31",
+    rust:         "#A83C20",
+
+    hairline:     "rgba(200,136,10,0.20)",
+    border:       "rgba(0,0,0,0.10)",
+    borderSolid:  "#E0D8CC",
+
+    surface:      "rgba(0,0,0,0.04)",
+    surfaceHover: "rgba(0,0,0,0.07)",
+
+    void:         "#EDE8DF",
+    voidT:        "rgba(237,232,223,0.92)",
+
+    selectionBg:  "#C8880A",
+    selectionText:"#FFFFFF",
+
+    isDark: false,
+  };
+}
