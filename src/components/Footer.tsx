@@ -123,9 +123,7 @@ function TyreGlyph() {
    ═══════════════════════════════════════════════════════════════ */
 export default function Footer() {
   const footerRef = useRef<HTMLElement>(null);
-  const [vis, setVis]       = useState(false);
-  const [email, setEmail]   = useState("");
-  const [subOk, setSubOk]   = useState(false);
+  const [vis, setVis] = useState(false);
   const { theme } = useTheme();
   const isDark = theme === "dark";
 
@@ -137,15 +135,10 @@ export default function Footer() {
     textDim:     isDark ? "rgba(255,255,255,0.42)"     : "rgba(26,26,20,0.55)",
     textMuted:   isDark ? "rgba(255,255,255,0.28)"     : "rgba(26,26,20,0.40)",
     textFaint:   isDark ? "rgba(255,255,255,0.32)"     : "rgba(26,26,20,0.35)",
-    placeholder: isDark ? "rgba(255,255,255,0.32)"     : "rgba(26,26,20,0.35)",
-    inputBg:     isDark ? "rgba(255,255,255,0.04)"     : "rgba(0,0,0,0.04)",
-    inputBorder: isDark ? "rgba(255,255,255,0.16)"     : "rgba(0,0,0,0.14)",
-    inputText:   isDark ? "#ffffff"                    : "#1A1A14",
     iconBorder:  isDark ? "rgba(255,255,255,0.18)"     : "rgba(0,0,0,0.14)",
     iconColor:   isDark ? "rgba(255,255,255,0.65)"     : "rgba(26,26,20,0.55)",
     navLinkClr:  isDark ? "rgba(255,255,255,0.82)"     : "#1A1A14",
     socialClr:   isDark ? "rgba(255,255,255,0.42)"     : "rgba(26,26,20,0.55)",
-    starfield:   isDark,
     glowRed:     isDark ? "rgba(200,18,31,0.26)"       : "rgba(200,18,31,0.10)",
     scanline:    isDark ? "rgba(255,255,255,0.011)"    : "rgba(0,0,0,0.015)",
     logoFilter:  isDark ? undefined : "brightness(0.15) saturate(2) sepia(0.4) hue-rotate(5deg)",
@@ -172,11 +165,6 @@ export default function Footer() {
     opacity: vis ? 1 : 0,
     transform: vis ? "none" : "translateX(36px)",
     transition: `opacity .7s cubic-bezier(.22,1,.36,1) ${delay}ms, transform .7s cubic-bezier(.22,1,.36,1) ${delay}ms`,
-  });
-  const fromTop = (delay: number): React.CSSProperties => ({
-    opacity: vis ? 1 : 0,
-    transform: vis ? "none" : "translateY(-16px)",
-    transition: `opacity .7s ease ${delay}ms, transform .7s ease ${delay}ms`,
   });
 
   return (
@@ -207,17 +195,6 @@ export default function Footer() {
           text-align: right; transition: color .2s ease;
         }
         .ft-social:hover { color: ${RED_HX}; }
-
-        .ft-sub-input::placeholder { color: ${FT.placeholder}; }
-        .ft-sub-input { color: ${FT.inputText}; }
-
-        /* ── Subscribe bar ── */
-        .ft-subscribe {
-          position: relative; z-index: 3;
-          border-bottom: 1px solid ${FT.border};
-          padding: 26px 48px;
-          display: flex; flex-direction: column; align-items: center; gap: 12px;
-        }
 
         /* ── 3-col body ── */
         .ft-body {
@@ -280,8 +257,7 @@ export default function Footer() {
           .ft-left  { padding-bottom: 40px !important; }
           .ft-right { padding-bottom: 40px !important; }
 
-          .ft-subscribe { padding: 22px 32px !important; }
-          .ft-bottom    { padding: 14px 32px !important; }
+          .ft-bottom { padding: 14px 32px !important; }
         }
 
         /* ══════════════════════════════════════════════════
@@ -327,26 +303,6 @@ export default function Footer() {
 
           .ft-left { padding-bottom: 0 !important; }
 
-          .ft-subscribe {
-            padding: 20px !important;
-            align-items: stretch !important;
-          }
-          .ft-subscribe p { text-align: center; }
-
-          /* Stack subscribe input/button vertically */
-          .ft-sub-row {
-            flex-direction: column !important;
-            border-radius: 10px !important;
-          }
-          .ft-sub-row input {
-            border-bottom: 1px solid ${FT.inputBorder} !important;
-            padding: 14px 18px !important;
-          }
-          .ft-sub-row button {
-            padding: 14px !important;
-            border-radius: 0 0 8px 8px !important;
-          }
-
           .ft-bottom {
             flex-direction: column !important;
             align-items: flex-start !important;
@@ -376,37 +332,6 @@ export default function Footer() {
 
         {/* Red radial glow */}
         <div style={{ position: "absolute", bottom: "-12%", left: "50%", transform: "translateX(-50%)", width: 720, height: 520, borderRadius: "50%", background: `radial-gradient(ellipse at center,${FT.glowRed} 0%,transparent 68%)`, pointerEvents: "none", zIndex: 1 }} />
-
-        {/* ── SUBSCRIBE BAR ── */}
-        <div className="ft-subscribe" style={{ ...fromTop(0) }}>
-          <p style={{ fontFamily: MONO, fontSize: ".7rem", letterSpacing: ".22em", textTransform: "uppercase", color: FT.textDim, margin: 0, textAlign: "center" }}>
-            Stay up to date with our latest offers and tyre tips
-          </p>
-          <div
-            className="ft-sub-row"
-            style={{
-              display: "flex", width: "100%", maxWidth: 600,
-              border: `1.5px solid ${FT.inputBorder}`,
-              borderRadius: 40, overflow: "hidden",
-              background: FT.inputBg, backdropFilter: "blur(6px)",
-            }}
-          >
-            <input
-              type="email"
-              value={email}
-              onChange={e => { setEmail(e.target.value); setSubOk(false); }}
-              placeholder="ENTER YOUR EMAIL"
-              className="ft-sub-input"
-              style={{ flex: 1, background: "transparent", border: "none", outline: "none", padding: "15px 22px", color: FT.inputText, fontFamily: MONO, fontSize: ".75rem", letterSpacing: ".13em", minWidth: 0 }}
-            />
-            <button
-              onClick={() => { if (email) { setSubOk(true); setEmail(""); } }}
-              style={{ background: subOk ? "#1a7a3c" : RED, color: "#fff", border: "none", padding: "0 26px", fontFamily: MONO, fontSize: ".75rem", fontWeight: 700, letterSpacing: ".17em", cursor: "pointer", transition: "background .3s ease", whiteSpace: "nowrap", flexShrink: 0 }}
-            >
-              {subOk ? "✓ DONE" : "SUBSCRIBE"}
-            </button>
-          </div>
-        </div>
 
         {/* ── MAIN BODY GRID ── */}
         <div className="ft-body">

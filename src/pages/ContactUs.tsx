@@ -26,7 +26,6 @@ function getCxTokens(isDark: boolean) {
     body:         "'Archivo',sans-serif",
   };
 }
-const T = getCxTokens(true);
 
 type CxTokens = ReturnType<typeof getCxTokens>;
 const CxTheme = createContext<CxTokens>(getCxTokens(true));
@@ -63,19 +62,29 @@ const CSS = `
   /* vertical rail ticker */
   .cx-vrail { display:flex; flex-direction:column; gap:32px; animation:cx-rail 22s linear infinite; }
 
-  /* form inputs */
+  /* form inputs — underline only, no box */
   .cx-field {
-    border:none; border-bottom:1px solid var(--cv-border-dark);
-    background:transparent; outline:none;
-    font-family:'Archivo',sans-serif; font-size:1rem; font-weight:500;
-    color:var(--cv-text-dark); padding:14px 0; width:100%;
+    border:none;
+    border-bottom:1.5px solid rgba(26,27,20,0.18);
+    border-radius:0;
+    background:transparent;
+    outline:none;
+    font-family:'Archivo',sans-serif;
+    font-size:1rem;
+    font-weight:500;
+    color:var(--cv-text-dark);
+    padding:14px 0;
+    width:100%;
     transition:border-color .25s;
+    -webkit-appearance:none;
+    appearance:none;
+    box-shadow:none;
   }
   .cx-field:focus { border-color:#D4A843; }
   .cx-field::placeholder { color:rgba(26,27,20,.35); font-weight:400; }
   .cx-field-wrap { position:relative; margin-bottom:28px; }
   .cx-field-wrap::after {
-    content:''; position:absolute; bottom:0; left:0; width:0; height:1px;
+    content:''; position:absolute; bottom:0; left:0; width:0; height:1.5px;
     background:#D4A843; transition:width .35s cubic-bezier(.22,1,.36,1);
   }
   .cx-field-wrap:focus-within::after { width:100%; }
@@ -97,6 +106,7 @@ const CSS = `
     transition:background .25s, color .25s, box-shadow .25s;
   }
   .cx-submit:hover { background:#D4A843; color:#1A1B14; box-shadow:0 8px 28px rgba(212,168,67,.35); }
+  .cx-submit:disabled { opacity:.6; cursor:not-allowed; }
   .cx-submit::after {
     content:''; position:absolute; top:-50%; left:-60%;
     width:200%; height:200%;
@@ -185,16 +195,9 @@ const CSS = `
      RESPONSIVE — 960px (tablet)
      ══════════════════════════════════════════════════════════════ */
   @media(max-width:960px) {
-    /* Rail hidden on tablet */
     .cx-rail-col { display:none !important; }
-
-    /* Hero collapses to single column */
-    .cx-hero-grid {
-      grid-template-columns:1fr !important;
-    }
-    .cx-hero-left {
-      padding-right:0 !important;
-    }
+    .cx-hero-grid { grid-template-columns:1fr !important; }
+    .cx-hero-left { padding-right:0 !important; }
     .cx-hero-right {
       padding-left:0 !important;
       border-left:none !important;
@@ -203,19 +206,10 @@ const CSS = `
       margin-top:8px;
     }
     .cx-hero-num { font-size:clamp(5rem,18vw,10rem) !important; }
-
-    /* Bento collapses */
-    .cx-bento-row {
-      grid-template-columns:1fr 1fr !important;
-      grid-template-rows:auto !important;
-    }
+    .cx-bento-row { grid-template-columns:1fr 1fr !important; grid-template-rows:auto !important; }
     .cx-bento-tall { grid-row:auto !important; grid-column:1 / -1 !important; }
-
-    /* Form collapses */
     .cx-form-sec { grid-template-columns:1fr !important; min-height:auto !important; }
     .cx-form-cols { grid-template-columns:1fr 1fr !important; }
-
-    /* Hours bar wraps */
     .cx-bar { flex-wrap:wrap !important; gap:8px !important; }
     .cx-bar > * { flex:1 1 calc(25% - 8px) !important; min-width:80px !important; }
   }
@@ -224,25 +218,12 @@ const CSS = `
      RESPONSIVE — 600px (mobile)
      ══════════════════════════════════════════════════════════════ */
   @media(max-width:600px) {
-    /* Bento full single column */
     .cx-bento-row { grid-template-columns:1fr !important; }
-
-    /* Form fields stack */
     .cx-form-cols { grid-template-columns:1fr !important; }
-
-    /* Hours: 2-up then full */
     .cx-bar > * { flex:1 1 calc(50% - 8px) !important; min-width:100px !important; }
-
-    /* Footer row stack */
     .cx-footer-row { flex-direction:column !important; align-items:flex-start !important; gap:16px !important; }
-
-    /* Reduce section padding */
     .cx-sec-pad { padding-left:20px !important; padding-right:20px !important; }
-
-    /* Reduce hero vertical rail padding offset */
     .cx-hero-pad { padding-left:20px !important; padding-right:20px !important; padding-top:72px !important; }
-
-    /* Hide decorative vertical/horizontal rules in hero on tiny screens */
     .cx-hero-vline { display:none !important; }
     .cx-hero-hline { display:none !important; }
   }
@@ -299,9 +280,6 @@ const IPin    = ()=><svg {...svgP} width={20} height={20}><path d="M21 10c0 7-9 
 const IClock  = ()=><svg {...svgP} width={20} height={20}><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>;
 const IArrow  = ()=><svg {...svgP} width={16} height={16}><path d="M7 17l5-5-5-5"/><path d="M4 12h8"/></svg>;
 const ICheck  = ()=><svg {...svgP} width={22} height={22}><path d="M20 6L9 17l-5-5"/></svg>;
-const IWrench = ()=><svg {...svgP} width={20} height={20}><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>;
-const ITyre   = ()=><svg {...svgP} width={20} height={20}><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2"/></svg>;
-const IStar   = ()=><svg {...svgP} width={20} height={20}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>;
 
 /* ============================================================================
    VERTICAL RAIL
@@ -335,14 +313,9 @@ function Hero() {
 
   return (
     <section style={{ position:"relative", background:"var(--cv-bg)", overflow:"hidden", minHeight:"100vh", display:"flex", flexDirection:"column" }}>
-      {/* Decorative rules — hidden on mobile via className */}
       <div className="cx-hero-hline" style={{ position:"absolute", top:"50%", left:40, right:0, height:1, background:`linear-gradient(to right,var(--cv-accent)55,transparent 80%)`, pointerEvents:"none", zIndex:1 }}/>
       <div className="cx-hero-vline" style={{ position:"absolute", left:"48%", top:0, bottom:0, width:1, background:`linear-gradient(to bottom,transparent,var(--cv-accent)33 30%,var(--cv-accent)33 70%,transparent)`, pointerEvents:"none", zIndex:1 }}/>
-
-      {/* Dot grid */}
       <div style={{ position:"absolute", inset:0, backgroundImage:`radial-gradient(circle, rgba(212,168,67,.12) 1px, transparent 1px)`, backgroundSize:"40px 40px", pointerEvents:"none", zIndex:0 }}/>
-
-      {/* Glows */}
       <div style={{ position:"absolute", bottom:"-20%", left:"10%", width:500, height:500, borderRadius:"50%", background:`radial-gradient(circle,var(--cv-accent)18,transparent 65%)`, filter:"blur(60px)", animation:"cx-glow 6s ease-in-out infinite", pointerEvents:"none" }}/>
       <div style={{ position:"absolute", top:"-10%", right:"5%", width:400, height:400, borderRadius:"50%", background:`radial-gradient(circle,var(--cv-green)12,transparent 65%)`, filter:"blur(70px)", animation:"cx-glow 8s ease-in-out infinite .6s", pointerEvents:"none" }}/>
 
@@ -441,6 +414,236 @@ function ContactCard({ icon, label, value, sub }: { icon:React.ReactNode; label:
 }
 
 /* ============================================================================
+   FORM VALIDATION HELPERS
+   ========================================================================== */
+const MAX_MESSAGE_WORDS = 50;
+
+function isValidName(v: string) {
+  return v.trim().length > 0;
+}
+function isValidPhone(v: string) {
+  const digits = v.replace(/\D/g, "");
+  return digits.length === 10;
+}
+function isValidEmail(v: string) {
+  // requires something@something.something
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
+}
+function wordCount(v: string) {
+  const trimmed = v.trim();
+  return trimmed === "" ? 0 : trimmed.split(/\s+/).length;
+}
+function clampToWordLimit(v: string, limit: number) {
+  const words = v.split(/\s+/);
+  if (words.length <= limit) return v;
+  // keep original spacing as much as possible by rejoining first `limit` words
+  return words.slice(0, limit).join(" ");
+}
+
+/* Field border color logic:
+   - not touched yet -> default subtle border
+   - touched + valid  -> green
+   - touched + empty/invalid -> red
+   For optional-looking fields we still apply the same rule once touched,
+   since validity is what determines color (not "required"-ness). */
+function fieldBorderColor(touched: boolean, valid: boolean, defaultColor: string) {
+  if (!touched) return defaultColor;
+  return valid ? "#3DA854" : "#D43B3B";
+}
+
+/* ============================================================================
+   FORM SECTION
+   ========================================================================== */
+function FormSection() {
+  const T = useCxT();
+  const [step, setStep] = useState<"form"|"sent">("form");
+  const [busy, setBusy] = useState(false);
+  const [form, setForm] = useState({ name:"", phone:"", email:"", service:"", message:"", vehicle:"" });
+  const [touched, setTouched] = useState({ name:false, phone:false, email:false });
+
+  const up = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const value = e.target.value;
+    if (k === "message") {
+      setForm(prev => ({ ...prev, message: clampToWordLimit(value, MAX_MESSAGE_WORDS) }));
+      return;
+    }
+    setForm(prev => ({ ...prev, [k]: value }));
+  };
+
+  const markTouched = (k: keyof typeof touched) => () => setTouched(prev => ({ ...prev, [k]: true }));
+
+  const nameValid  = isValidName(form.name);
+  const phoneValid = isValidPhone(form.phone);
+  const emailValid = isValidEmail(form.email);
+  const msgWords    = wordCount(form.message);
+
+  const defaultBorder = "rgba(26,27,20,0.18)";
+  const nameBorder  = fieldBorderColor(touched.name,  nameValid,  defaultBorder);
+  const phoneBorder = fieldBorderColor(touched.phone, phoneValid, defaultBorder);
+  const emailBorder = fieldBorderColor(touched.email, emailValid, defaultBorder);
+
+  const canSubmit = nameValid && phoneValid && emailValid;
+
+  const submit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // mark everything touched so any unfixed errors show up
+    setTouched({ name:true, phone:true, email:true });
+    if (!canSubmit) return;
+    setBusy(true);
+    setTimeout(() => { setBusy(false); setStep("sent"); }, 1400);
+  };
+
+  return (
+    <section id="form" style={{ position:"relative", overflow:"hidden" }}>
+      <div className="cx-form-sec">
+
+        {/* LEFT — dark panel */}
+        <div style={{ background:T.inkDark, position:"relative", overflow:"hidden", padding:"clamp(40px,6vw,64px) clamp(20px,4vw,52px)", display:"flex", flexDirection:"column", justifyContent:"space-between" }}>
+          <div style={{ position:"absolute", inset:0, backgroundImage:`radial-gradient(circle,rgba(212,168,67,.1) 1px,transparent 1px)`, backgroundSize:"36px 36px", pointerEvents:"none" }}/>
+          <div style={{ position:"absolute", bottom:"-20%", left:"-10%", width:350, height:350, borderRadius:"50%", background:`radial-gradient(circle,var(--cv-accent)18,transparent 70%)`, filter:"blur(50px)", pointerEvents:"none" }}/>
+
+          <div style={{ position:"relative", zIndex:1 }}>
+            <p style={{ fontFamily:T.mono, fontSize:".58rem", letterSpacing:".32em", textTransform:"uppercase", color:"var(--cv-accent)", margin:"0 0 24px" }}>[ 02 ] — Message Us</p>
+            <h2 style={{ fontFamily:T.display, fontWeight:900, fontSize:"clamp(2rem,4vw,3.8rem)", lineHeight:.92, letterSpacing:"-.04em", color:"var(--cv-text)", textTransform:"uppercase", margin:"0 0 24px" }}>
+              Send us<br/>a message<span style={{ color:"var(--cv-accent)" }}>.</span>
+            </h2>
+            <div style={{ width:48, height:2, background:T.amber, marginBottom:24 }}/>
+            <p style={{ fontFamily:T.body, fontSize:".95rem", color:"rgba(245,240,232,.5)", lineHeight:1.72, margin:"0 0 36px", fontWeight:300, maxWidth:320 }}>
+              Fill in the form and we'll get back to you the same business day with an expert recommendation.
+            </p>
+
+            {[["01","Fill the form","30 seconds"],["02","We review it","Same day"],["03","We call back","Expert advice"]].map(([n, title, sub]) => (
+              <div key={n} style={{ display:"flex", alignItems:"center", gap:16, marginBottom:20 }}>
+                <div style={{ width:32, height:32, borderRadius:"50%", background:`rgba(212,168,67,.12)`, border:`1px solid rgba(212,168,67,.3)`, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+                  <span style={{ fontFamily:T.mono, fontSize:".58rem", color:"var(--cv-accent)", fontWeight:700 }}>{n}</span>
+                </div>
+                <div>
+                  <p style={{ fontFamily:T.display, fontWeight:700, fontSize:".88rem", color:"var(--cv-text)", margin:0 }}>{title}</p>
+                  <p style={{ fontFamily:T.mono, fontSize:".58rem", color:"rgba(212,168,67,.55)", margin:0, letterSpacing:".1em" }}>{sub}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div style={{ position:"relative", zIndex:1, display:"flex", gap:20, flexWrap:"wrap", paddingTop:24, borderTop:`1px solid rgba(212,168,67,.12)`, marginTop:24 }}>
+            {[["4.8★","Google Reviews"],["10K+","Happy Drivers"],["Same Day","Turnaround"]].map(([v, l]) => (
+              <div key={l}>
+                <p style={{ fontFamily:T.display, fontWeight:900, fontSize:"1rem", color:"var(--cv-accent)", margin:"0 0 2px" }}>{v}</p>
+                <p style={{ fontFamily:T.mono, fontSize:".55rem", color:"rgba(245,240,232,.35)", letterSpacing:".12em", textTransform:"uppercase", margin:0 }}>{l}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* RIGHT — form panel */}
+        <div style={{ background:"var(--cv-paper)", padding:"clamp(40px,6vw,64px) clamp(20px,4vw,52px)", display:"flex", flexDirection:"column", justifyContent:"center", position:"relative", overflow:"hidden" }}>
+          <div style={{ position:"absolute", top:"-10%", right:"-10%", width:300, height:300, borderRadius:"50%", background:`radial-gradient(circle,rgba(212,168,67,.08),transparent 65%)`, filter:"blur(40px)", pointerEvents:"none" }}/>
+
+          <AnimatePresence mode="wait">
+            {step === "sent" ? (
+              <motion.div key="sent" initial={{opacity:0,scale:.9}} animate={{opacity:1,scale:1}} exit={{opacity:0}} transition={{duration:.4}} style={{ textAlign:"center", padding:"40px 20px", position:"relative", zIndex:1 }}>
+                <div style={{ width:64, height:64, borderRadius:"50%", background:T.inkDark, display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto 20px", color:"var(--cv-accent)" }}>
+                  <ICheck/>
+                </div>
+                <h3 style={{ fontFamily:T.display, fontWeight:900, fontSize:"1.6rem", color:"var(--cv-text-dark)", margin:"0 0 10px", textTransform:"uppercase" }}>Message Received!</h3>
+                <p style={{ fontFamily:T.body, fontSize:".95rem", color:"var(--cv-muted, rgba(26,27,20,.55))", margin:"0 0 28px", lineHeight:1.6 }}>We'll call or email you back within the same business day.</p>
+                <button className="cx-submit" onClick={() => { setStep("form"); setForm({ name:"", phone:"", email:"", service:"", message:"", vehicle:"" }); setTouched({ name:false, phone:false, email:false }); }} style={{ maxWidth:240, margin:"0 auto" }}>Send Another →</button>
+              </motion.div>
+            ) : (
+              <motion.form key="form" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} transition={{duration:.3}} onSubmit={submit} style={{ position:"relative", zIndex:1 }}>
+                <p style={{ fontFamily:T.mono, fontSize:".6rem", letterSpacing:".28em", textTransform:"uppercase", color:"var(--cv-accent)", fontWeight:700, margin:"0 0 28px" }}>Your Details</p>
+
+                <div className="cx-form-cols">
+                  <div className="cx-field-wrap">
+                    <label className="cx-flabel">Full Name</label>
+                    <input
+                      className="cx-field"
+                      type="text"
+                      placeholder="Your name"
+                      value={form.name}
+                      onChange={up("name")}
+                      onBlur={markTouched("name")}
+                      style={{ borderBottomColor: nameBorder }}
+                      required
+                    />
+                    {touched.name && !nameValid && (
+                      <span style={{ fontFamily:T.mono, fontSize:".56rem", color:"#D43B3B", letterSpacing:".05em" }}>Please enter your name</span>
+                    )}
+                  </div>
+                  <div className="cx-field-wrap">
+                    <label className="cx-flabel">Phone</label>
+                    <input
+                      className="cx-field"
+                      type="tel"
+                      placeholder="+91 xxxxx xxxxx"
+                      value={form.phone}
+                      onChange={up("phone")}
+                      onBlur={markTouched("phone")}
+                      style={{ borderBottomColor: phoneBorder }}
+                    />
+                    {touched.phone && !phoneValid && (
+                      <span style={{ fontFamily:T.mono, fontSize:".56rem", color:"#D43B3B", letterSpacing:".05em" }}>Enter a valid 10-digit number</span>
+                    )}
+                  </div>
+                  <div className="cx-field-wrap">
+                    <label className="cx-flabel">Email</label>
+                    <input
+                      className="cx-field"
+                      type="email"
+                      placeholder="your@email.com"
+                      value={form.email}
+                      onChange={up("email")}
+                      onBlur={markTouched("email")}
+                      style={{ borderBottomColor: emailBorder }}
+                      required
+                    />
+                    {touched.email && !emailValid && (
+                      <span style={{ fontFamily:T.mono, fontSize:".56rem", color:"#D43B3B", letterSpacing:".05em" }}>Enter a valid email address</span>
+                    )}
+                  </div>
+                  <div className="cx-field-wrap">
+                    <label className="cx-flabel">Vehicle</label>
+                    <input className="cx-field" type="text" placeholder="e.g. Honda City 2022" value={form.vehicle} onChange={up("vehicle")}/>
+                  </div>
+                </div>
+
+                <div className="cx-field-wrap">
+                  <label className="cx-flabel">Service Needed</label>
+                  <select className="cx-field" value={form.service} onChange={up("service")}>
+                    <option value="">Select a service…</option>
+                    {["Tyre Replacement","Wheel Balancing","Wheel Alignment","Tyre Rotation","Puncture Repair","Nitrogen Inflation","Tyre Inspection","Performance Tyres","Commercial / Fleet","Not sure — need advice"].map(s => <option key={s}>{s}</option>)}
+                  </select>
+                </div>
+
+                <div className="cx-field-wrap">
+                  <label className="cx-flabel">Message</label>
+                  <textarea
+                    className="cx-field"
+                    rows={3}
+                    placeholder="Tell us anything else — tyre size, budget, urgency…"
+                    value={form.message}
+                    onChange={up("message")}
+                    style={{ resize:"none" }}
+                  />
+                  <div style={{ display:"flex", justifyContent:"flex-end", marginTop:4 }}>
+                    <span style={{ fontFamily:T.mono, fontSize:".56rem", letterSpacing:".05em", color: msgWords >= MAX_MESSAGE_WORDS ? "#D43B3B" : "rgba(26,27,20,.4)" }}>
+                      {msgWords}/{MAX_MESSAGE_WORDS} words
+                    </span>
+                  </div>
+                </div>
+
+                <button type="submit" className="cx-submit" disabled={busy}>{busy ? "Sending…" : "Send Message →"}</button>
+                <p style={{ fontFamily:T.mono, fontSize:".56rem", letterSpacing:".1em", color:"var(--cv-muted, rgba(26,27,20,.35))", textAlign:"center", marginTop:12 }}>We respond within the same business day</p>
+              </motion.form>
+            )}
+          </AnimatePresence>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ============================================================================
    BENTO INFO GRID
    ========================================================================== */
 function BentoSection() {
@@ -455,7 +658,7 @@ function BentoSection() {
         <Rev style={{ marginBottom:52 }}>
           <div style={{ display:"flex", alignItems:"flex-end", justifyContent:"space-between", flexWrap:"wrap", gap:16 }}>
             <div>
-              <p style={{ fontFamily:T.mono, fontSize:".6rem", letterSpacing:".32em", textTransform:"uppercase", color:"var(--cv-accent)", fontWeight:700, margin:"0 0 10px" }}>[ 02 ] — What We Offer</p>
+              <p style={{ fontFamily:T.mono, fontSize:".6rem", letterSpacing:".32em", textTransform:"uppercase", color:"var(--cv-accent)", fontWeight:700, margin:"0 0 10px" }}>[ 03 ] — What We Offer</p>
               <h2 style={{ fontFamily:T.display, fontWeight:900, fontSize:"clamp(2rem,4vw,3.4rem)", color:"var(--cv-text-dark)", letterSpacing:"-.03em", lineHeight:.95, margin:0, textTransform:"uppercase" }}>
                 Every service<br/>under one roof
               </h2>
@@ -468,7 +671,6 @@ function BentoSection() {
         </Rev>
 
         <div className="cx-bento-row">
-          {/* Wide/tall card */}
           <Rev cls="cx-rvL" style={{}}>
             <div className="cx-bento cx-bento-tall" style={{ background:"var(--cv-bg2)", border:`1px solid var(--cv-border)`, padding:"40px 36px", position:"relative", overflow:"hidden" }}>
               <div style={{ position:"absolute", bottom:-60, right:-60, width:220, height:220, borderRadius:"50%", background:`radial-gradient(circle,var(--cv-accent)18,transparent 70%)`, pointerEvents:"none" }}/>
@@ -532,124 +734,6 @@ function BentoSection() {
 }
 
 /* ============================================================================
-   FORM SECTION
-   ========================================================================== */
-function FormSection() {
-  const T = useCxT();
-  const [step, setStep] = useState<"form"|"sent">("form");
-  const [busy, setBusy] = useState(false);
-  const [form, setForm] = useState({ name:"", phone:"", email:"", service:"", message:"", vehicle:"" });
-  const up = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setForm(prev => ({ ...prev, [k]: e.target.value }));
-
-  const submit = (e: React.FormEvent) => {
-    e.preventDefault(); setBusy(true);
-    setTimeout(() => { setBusy(false); setStep("sent"); }, 1400);
-  };
-
-  return (
-    <section id="form" style={{ position:"relative", overflow:"hidden" }}>
-      <div className="cx-form-sec">
-
-        {/* LEFT — dark panel */}
-        <div style={{ background:T.inkDark, position:"relative", overflow:"hidden", padding:"clamp(40px,6vw,64px) clamp(20px,4vw,52px)", display:"flex", flexDirection:"column", justifyContent:"space-between" }}>
-          <div style={{ position:"absolute", inset:0, backgroundImage:`radial-gradient(circle,rgba(212,168,67,.1) 1px,transparent 1px)`, backgroundSize:"36px 36px", pointerEvents:"none" }}/>
-          <div style={{ position:"absolute", bottom:"-20%", left:"-10%", width:350, height:350, borderRadius:"50%", background:`radial-gradient(circle,var(--cv-accent)18,transparent 70%)`, filter:"blur(50px)", pointerEvents:"none" }}/>
-
-          <div style={{ position:"relative", zIndex:1 }}>
-            <p style={{ fontFamily:T.mono, fontSize:".58rem", letterSpacing:".32em", textTransform:"uppercase", color:"var(--cv-accent)", margin:"0 0 24px" }}>[ 03 ] — Message Us</p>
-            <h2 style={{ fontFamily:T.display, fontWeight:900, fontSize:"clamp(2rem,4vw,3.8rem)", lineHeight:.92, letterSpacing:"-.04em", color:"var(--cv-text)", textTransform:"uppercase", margin:"0 0 24px" }}>
-              Send us<br/>a message<span style={{ color:"var(--cv-accent)" }}>.</span>
-            </h2>
-            <div style={{ width:48, height:2, background:T.amber, marginBottom:24 }}/>
-            <p style={{ fontFamily:T.body, fontSize:".95rem", color:"rgba(245,240,232,.5)", lineHeight:1.72, margin:"0 0 36px", fontWeight:300, maxWidth:320 }}>
-              Fill in the form and we'll get back to you the same business day with an expert recommendation.
-            </p>
-
-            {[["01","Fill the form","30 seconds"],["02","We review it","Same day"],["03","We call back","Expert advice"]].map(([n, title, sub]) => (
-              <div key={n} style={{ display:"flex", alignItems:"center", gap:16, marginBottom:20 }}>
-                <div style={{ width:32, height:32, borderRadius:"50%", background:`rgba(212,168,67,.12)`, border:`1px solid rgba(212,168,67,.3)`, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
-                  <span style={{ fontFamily:T.mono, fontSize:".58rem", color:"var(--cv-accent)", fontWeight:700 }}>{n}</span>
-                </div>
-                <div>
-                  <p style={{ fontFamily:T.display, fontWeight:700, fontSize:".88rem", color:"var(--cv-text)", margin:0 }}>{title}</p>
-                  <p style={{ fontFamily:T.mono, fontSize:".58rem", color:"rgba(212,168,67,.55)", margin:0, letterSpacing:".1em" }}>{sub}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div style={{ position:"relative", zIndex:1, display:"flex", gap:20, flexWrap:"wrap", paddingTop:24, borderTop:`1px solid rgba(212,168,67,.12)`, marginTop:24 }}>
-            {[["4.8★","Google Reviews"],["10K+","Happy Drivers"],["Same Day","Turnaround"]].map(([v, l]) => (
-              <div key={l}>
-                <p style={{ fontFamily:T.display, fontWeight:900, fontSize:"1rem", color:"var(--cv-accent)", margin:"0 0 2px" }}>{v}</p>
-                <p style={{ fontFamily:T.mono, fontSize:".55rem", color:"rgba(245,240,232,.35)", letterSpacing:".12em", textTransform:"uppercase", margin:0 }}>{l}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* RIGHT — cream form panel */}
-        <div style={{ background:"var(--cv-paper)", padding:"clamp(40px,6vw,64px) clamp(20px,4vw,52px)", display:"flex", flexDirection:"column", justifyContent:"center", position:"relative", overflow:"hidden" }}>
-          <div style={{ position:"absolute", top:"-10%", right:"-10%", width:300, height:300, borderRadius:"50%", background:`radial-gradient(circle,rgba(212,168,67,.08),transparent 65%)`, filter:"blur(40px)", pointerEvents:"none" }}/>
-
-          <AnimatePresence mode="wait">
-            {step === "sent" ? (
-              <motion.div key="sent" initial={{opacity:0,scale:.9}} animate={{opacity:1,scale:1}} exit={{opacity:0}} transition={{duration:.4}} style={{ textAlign:"center", padding:"40px 20px", position:"relative", zIndex:1 }}>
-                <div style={{ width:64, height:64, borderRadius:"50%", background:T.inkDark, display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto 20px", color:"var(--cv-accent)" }}>
-                  <ICheck/>
-                </div>
-                <h3 style={{ fontFamily:T.display, fontWeight:900, fontSize:"1.6rem", color:"var(--cv-text-dark)", margin:"0 0 10px", textTransform:"uppercase" }}>Message Received!</h3>
-                <p style={{ fontFamily:T.body, fontSize:".95rem", color:"var(--cv-muted, rgba(26,27,20,.55))", margin:"0 0 28px", lineHeight:1.6 }}>We'll call or email you back within the same business day.</p>
-                <button className="cx-submit" onClick={() => setStep("form")} style={{ maxWidth:240, margin:"0 auto" }}>Send Another →</button>
-              </motion.div>
-            ) : (
-              <motion.form key="form" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} transition={{duration:.3}} onSubmit={submit} style={{ position:"relative", zIndex:1 }}>
-                <p style={{ fontFamily:T.mono, fontSize:".6rem", letterSpacing:".28em", textTransform:"uppercase", color:"var(--cv-accent)", fontWeight:700, margin:"0 0 28px" }}>Your Details</p>
-
-                <div className="cx-form-cols">
-                  <div className="cx-field-wrap">
-                    <label className="cx-flabel">Full Name</label>
-                    <input className="cx-field" type="text" placeholder="Your name" value={form.name} onChange={up("name")} required/>
-                  </div>
-                  <div className="cx-field-wrap">
-                    <label className="cx-flabel">Phone</label>
-                    <input className="cx-field" type="tel" placeholder="+91 xxxxx xxxxx" value={form.phone} onChange={up("phone")}/>
-                  </div>
-                  <div className="cx-field-wrap">
-                    <label className="cx-flabel">Email</label>
-                    <input className="cx-field" type="email" placeholder="your@email.com" value={form.email} onChange={up("email")} required/>
-                  </div>
-                  <div className="cx-field-wrap">
-                    <label className="cx-flabel">Vehicle</label>
-                    <input className="cx-field" type="text" placeholder="e.g. Honda City 2022" value={form.vehicle} onChange={up("vehicle")}/>
-                  </div>
-                </div>
-
-                <div className="cx-field-wrap">
-                  <label className="cx-flabel">Service Needed</label>
-                  <select className="cx-field" value={form.service} onChange={up("service")}>
-                    <option value="">Select a service…</option>
-                    {["Tyre Replacement","Wheel Balancing","Wheel Alignment","Tyre Rotation","Puncture Repair","Nitrogen Inflation","Tyre Inspection","Performance Tyres","Commercial / Fleet","Not sure — need advice"].map(s => <option key={s}>{s}</option>)}
-                  </select>
-                </div>
-
-                <div className="cx-field-wrap">
-                  <label className="cx-flabel">Message</label>
-                  <textarea className="cx-field" rows={3} placeholder="Tell us anything else — tyre size, budget, urgency…" value={form.message} onChange={up("message")} style={{ resize:"none" }}/>
-                </div>
-
-                <button type="submit" className="cx-submit" disabled={busy}>{busy ? "Sending…" : "Send Message →"}</button>
-                <p style={{ fontFamily:T.mono, fontSize:".56rem", letterSpacing:".1em", color:"var(--cv-muted, rgba(26,27,20,.35))", textAlign:"center", marginTop:12 }}>We respond within the same business day</p>
-              </motion.form>
-            )}
-          </AnimatePresence>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ============================================================================
    HOURS STRIP
    ========================================================================== */
 function HoursStrip() {
@@ -697,7 +781,7 @@ function HoursStrip() {
         </div>
 
         <Rev style={{ marginTop:28 }}>
-          <div style={{ display:"flex", alignItems:"center", gap:20, padding:"18px 24px", background:"var(--cv-bg2, rgba(20,22,8,.8))", border:`1px solid var(--cv-border)`, borderRadius:6, flexWrap:"wrap", gap:16 }}>
+          <div style={{ display:"flex", alignItems:"center", gap:20, padding:"18px 24px", background:"var(--cv-bg2, rgba(20,22,8,.8))", border:`1px solid var(--cv-border)`, borderRadius:6, flexWrap:"wrap" }}>
             <div style={{ display:"flex", alignItems:"center", gap:10, color:"var(--cv-accent)", minWidth:0, flex:1 }}>
               <IPin/><span style={{ fontFamily:T.display, fontWeight:700, fontSize:".9rem", color:"var(--cv-text)", wordBreak:"break-word" }}>123 Tyre Lane, Industrial Area, Mumbai MH 400001</span>
             </div>
@@ -776,8 +860,8 @@ export default function ContactUs() {
         <style>{CSS}</style>
         <VerticalRail/>
         <Hero/>
-        <BentoSection/>
         <FormSection/>
+        <BentoSection/>
         <HoursStrip/>
         <FooterCta/>
       </div>

@@ -5,6 +5,31 @@ interface IntroScreenProps {
   onEnter: () => void;
 }
 
+/* ---------- viewport size hook (handles SSR + resize + orientation) ---------- */
+function useViewportSize() {
+  const [size, setSize] = useState(() => ({
+    width: typeof document !== "undefined" ? document.documentElement.clientWidth : 1280,
+    height: typeof document !== "undefined" ? document.documentElement.clientHeight : 800,
+  }));
+
+  useEffect(() => {
+    const update = () =>
+      setSize({
+        width: document.documentElement.clientWidth,
+        height: document.documentElement.clientHeight,
+      });
+    update();
+    window.addEventListener("resize", update);
+    window.addEventListener("orientationchange", update);
+    return () => {
+      window.removeEventListener("resize", update);
+      window.removeEventListener("orientationchange", update);
+    };
+  }, []);
+
+  return size;
+}
+
 /* ---------- Starfield Canvas ---------- */
 function StarfieldCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -19,11 +44,21 @@ function StarfieldCanvas() {
     let stars: { x: number; y: number; r: number; o: number; speed: number }[] = [];
 
     const resize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-      stars = Array.from({ length: 220 }, () => ({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const w = document.documentElement.clientWidth;
+      const h = document.documentElement.clientHeight;
+
+      canvas.width = w * dpr;
+      canvas.height = h * dpr;
+      canvas.style.width = "100%";
+      canvas.style.height = "100%";
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      // Fewer stars on small screens for performance
+      const count = w < 600 ? 130 : 220;
+      stars = Array.from({ length: count }, () => ({
+        x: Math.random() * w,
+        y: Math.random() * h,
         r: 0.3 + Math.random() * 1.4,
         o: 0.15 + Math.random() * 0.65,
         speed: 0.0008 + Math.random() * 0.002,
@@ -32,7 +67,9 @@ function StarfieldCanvas() {
 
     let t = 0;
     const draw = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const w = document.documentElement.clientWidth;
+      const h = document.documentElement.clientHeight;
+      ctx.clearRect(0, 0, w, h);
       t += 0.012;
       stars.forEach((s) => {
         const flicker = s.o * (0.7 + 0.3 * Math.sin(t * s.speed * 1000 + s.x));
@@ -47,9 +84,11 @@ function StarfieldCanvas() {
     resize();
     draw();
     window.addEventListener("resize", resize);
+    window.addEventListener("orientationchange", resize);
     return () => {
       cancelAnimationFrame(animFrame);
       window.removeEventListener("resize", resize);
+      window.removeEventListener("orientationchange", resize);
     };
   }, []);
 
@@ -74,8 +113,8 @@ function Gear({
 }: {
   size: number;
   teeth: number;
-  cx: number;   // center x relative to parent
-  cy: number;   // center y relative to parent
+  cx: number; // center x relative to parent
+  cy: number; // center y relative to parent
   duration: number;
   direction?: 1 | -1;
   opacity?: number;
@@ -147,8 +186,16 @@ function Gear({
       <path d={buildPath()} fill={gearFill} stroke={gearStroke} strokeWidth={1.2} />
       <circle cx={0} cy={0} r={innerR} fill="#1e1a0c" stroke={gearStroke} strokeWidth={1} />
       {spokes.map((s, i) => (
-        <line key={i} x1={s.x1} y1={s.y1} x2={s.x2} y2={s.y2}
-          stroke={gearStroke} strokeWidth={spokeW} strokeLinecap="round" />
+        <line
+          key={i}
+          x1={s.x1}
+          y1={s.y1}
+          x2={s.x2}
+          y2={s.y2}
+          stroke={gearStroke}
+          strokeWidth={spokeW}
+          strokeLinecap="round"
+        />
       ))}
       <circle cx={0} cy={0} r={hubR} fill={gearFill} stroke={gearStroke} strokeWidth={1.2} />
       <circle cx={0} cy={0} r={hubR * 0.42} fill="#111" />
@@ -160,20 +207,33 @@ function Gear({
 function NebulaGlow() {
   return (
     <div style={{ position: "absolute", inset: 0, pointerEvents: "none" }}>
-      <div style={{
-        position: "absolute", left: "50%", top: "50%",
-        transform: "translate(-50%,-50%)",
-        width: "60vw", height: "60vh", borderRadius: "50%",
-        background: "radial-gradient(ellipse, rgba(20,40,80,0.55) 0%, rgba(10,20,50,0.3) 45%, transparent 75%)",
-        filter: "blur(40px)",
-      }} />
-      <div style={{
-        position: "absolute", left: "50%", top: "50%",
-        transform: "translate(-50%,-50%)",
-        width: "90vw", height: "80vh", borderRadius: "50%",
-        background: "radial-gradient(ellipse, rgba(80,55,10,0.18) 0%, transparent 65%)",
-        filter: "blur(60px)",
-      }} />
+      <div
+        style={{
+          position: "absolute",
+          left: "50%",
+          top: "50%",
+          transform: "translate(-50%,-50%)",
+          width: "60vw",
+          height: "60vh",
+          borderRadius: "50%",
+          background:
+            "radial-gradient(ellipse, rgba(20,40,80,0.55) 0%, rgba(10,20,50,0.3) 45%, transparent 75%)",
+          filter: "blur(40px)",
+        }}
+      />
+      <div
+        style={{
+          position: "absolute",
+          left: "50%",
+          top: "50%",
+          transform: "translate(-50%,-50%)",
+          width: "90vw",
+          height: "80vh",
+          borderRadius: "50%",
+          background: "radial-gradient(ellipse, rgba(80,55,10,0.18) 0%, transparent 65%)",
+          filter: "blur(60px)",
+        }}
+      />
     </div>
   );
 }
@@ -184,6 +244,10 @@ function NebulaGlow() {
 export default function IntroScreen({ onEnter }: IntroScreenProps) {
   const [phase, setPhase] = useState<"idle" | "zooming">("idle");
   const [hovered, setHovered] = useState(false);
+  const { width: vw, height: vh } = useViewportSize();
+
+  const isMobile = vw < 640;
+  const isSmallMobile = vw < 380;
 
   const handleEnter = () => {
     if (phase !== "idle") return;
@@ -191,14 +255,18 @@ export default function IntroScreen({ onEnter }: IntroScreenProps) {
     setTimeout(onEnter, 900);
   };
 
-  const portalSizeNum = typeof window !== "undefined"
-    ? Math.min(window.innerWidth * 0.42, 380)
-    : 380;
+  // Portal scales with the smaller viewport dimension so it always fits,
+  // with separate tighter caps for mobile so the flanking gears never
+  // get clipped off-screen.
+  const minDim = Math.min(vw, vh);
+  const portalSizeNum = isMobile
+    ? Math.min(vw * 0.6, minDim * 0.5, 260)
+    : Math.min(vw * 0.42, 380);
   const portalSize = `${portalSizeNum}px`;
 
-  const p  = portalSizeNum;         // centre gear & portal diameter
-  const lg = p * 0.72;              // large flanking gear diameter
-  const sm = p * 0.42;              // small corner gear diameter
+  const p = portalSizeNum; // centre gear & portal diameter
+  const lg = p * (isMobile ? 0.6 : 0.72); // large flanking gear diameter (smaller ratio on mobile to avoid clipping)
+  const sm = p * (isMobile ? 0.34 : 0.42); // small corner gear diameter
 
   // Gap between meshing gears (small positive = slight overlap like real gears)
   const mesh = p * 0.02;
@@ -213,6 +281,10 @@ export default function IntroScreen({ onEnter }: IntroScreenProps) {
   const smX = lgX + lg / 2 + sm / 2 - mesh;
   const smY = lg * 0.35;
 
+  // Hide flanking gears entirely on very small screens where they'd
+  // overflow / clutter the layout, keep just the centre gear + portal.
+  const showFlankingGears = !isMobile;
+
   return (
     <AnimatePresence>
       {phase !== "zooming" || true ? (
@@ -223,9 +295,16 @@ export default function IntroScreen({ onEnter }: IntroScreenProps) {
           exit={{ opacity: 0 }}
           transition={{ duration: 0.6 }}
           style={{
-            position: "fixed", inset: 0, zIndex: 9999,
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100dvh",
+            zIndex: 9999,
             background: "#080704",
-            display: "flex", alignItems: "center", justifyContent: "center",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
             overflow: "hidden",
           }}
         >
@@ -233,33 +312,42 @@ export default function IntroScreen({ onEnter }: IntroScreenProps) {
           <NebulaGlow />
 
           {/* ── GEAR CLUSTER — zero-size div anchored to exact screen centre ── */}
-          <div style={{
-            position: "absolute",
-            left: "50%", top: "50%",
-            // No transform needed — child cx/cy are relative to this point
-          }}>
+          <div
+            style={{
+              position: "absolute",
+              left: "50%",
+              top: "50%",
+              width: 0,
+              height: 0,
+            }}
+          >
             {/* Centre gear (behind portal) */}
-            <Gear size={p}  teeth={38} duration={30} direction={1}  opacity={0.9}  cx={0}    cy={0}   />
+            <Gear size={p} teeth={38} duration={30} direction={1} opacity={0.9} cx={0} cy={0} />
 
-            {/* Left large gear */}
-            <Gear size={lg} teeth={28} duration={22} direction={-1} opacity={0.82} cx={-lgX} cy={lgY} />
-
-            {/* Right large gear */}
-            <Gear size={lg} teeth={28} duration={22} direction={-1} opacity={0.82} cx={lgX}  cy={lgY} />
-
-            {/* Left small gear */}
-            <Gear size={sm} teeth={16} duration={13} direction={1}  opacity={0.72} cx={-smX} cy={smY} />
-
-            {/* Right small gear */}
-            <Gear size={sm} teeth={16} duration={13} direction={1}  opacity={0.72} cx={smX}  cy={smY} />
+            {showFlankingGears && (
+              <>
+                {/* Left large gear */}
+                <Gear size={lg} teeth={28} duration={22} direction={-1} opacity={0.82} cx={-lgX} cy={lgY} />
+                {/* Right large gear */}
+                <Gear size={lg} teeth={28} duration={22} direction={-1} opacity={0.82} cx={lgX} cy={lgY} />
+                {/* Left small gear */}
+                <Gear size={sm} teeth={16} duration={13} direction={1} opacity={0.72} cx={-smX} cy={smY} />
+                {/* Right small gear */}
+                <Gear size={sm} teeth={16} duration={13} direction={1} opacity={0.72} cx={smX} cy={smY} />
+              </>
+            )}
           </div>
 
           {/* ── PORTAL RING ──────────────────────────────────────── */}
           <motion.div
             style={{
               position: "absolute",
-              left: "50%", top: "50%",
-              width: portalSize, height: portalSize,
+              left: "50%",
+              top: "50%",
+              width: portalSize,
+              height: portalSize,
+              maxWidth: "78vw",
+              maxHeight: "78vw",
               transform: "translate(-50%, -50%)",
               borderRadius: "50%",
               border: hovered
@@ -268,17 +356,24 @@ export default function IntroScreen({ onEnter }: IntroScreenProps) {
               boxShadow: hovered
                 ? "0 0 80px 20px rgba(200,155,30,0.38), 0 0 30px 6px rgba(200,155,30,0.28), inset 0 0 40px 8px rgba(200,155,30,0.14)"
                 : "0 0 40px 8px rgba(180,135,20,0.22), 0 0 16px 3px rgba(180,135,20,0.18), inset 0 0 20px 2px rgba(180,135,20,0.08)",
-              display: "flex", alignItems: "center", justifyContent: "center",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
               cursor: "pointer",
               zIndex: 10,
+              touchAction: "manipulation",
+              WebkitTapHighlightColor: "transparent",
             }}
-            animate={phase === "zooming"
-              ? { scale: 12, opacity: 0 }
-              : { scale: 1,  opacity: 1 }}
-            transition={phase === "zooming"
-              ? { duration: 0.85, ease: [0.4, 0, 0.2, 1] }
-              : { duration: 0.4 }}
+            animate={
+              phase === "zooming" ? { scale: 12, opacity: 0 } : { scale: 1, opacity: 1 }
+            }
+            transition={
+              phase === "zooming"
+                ? { duration: 0.85, ease: [0.4, 0, 0.2, 1] }
+                : { duration: 0.4 }
+            }
             onClick={handleEnter}
+            onTap={handleEnter}
             onHoverStart={() => setHovered(true)}
             onHoverEnd={() => setHovered(false)}
           >
@@ -286,8 +381,11 @@ export default function IntroScreen({ onEnter }: IntroScreenProps) {
               animate={{ opacity: hovered ? 1 : 0 }}
               transition={{ duration: 0.35 }}
               style={{
-                position: "absolute", inset: 0, borderRadius: "50%",
-                background: "radial-gradient(ellipse at center, rgba(210,190,100,0.08) 0%, transparent 70%)",
+                position: "absolute",
+                inset: 0,
+                borderRadius: "50%",
+                background:
+                  "radial-gradient(ellipse at center, rgba(210,190,100,0.08) 0%, transparent 70%)",
               }}
             />
 
@@ -295,89 +393,155 @@ export default function IntroScreen({ onEnter }: IntroScreenProps) {
               animate={{ opacity: phase === "zooming" ? 0 : 1 }}
               transition={{ duration: 0.2 }}
               style={{
-                position: "relative", zIndex: 2,
-                display: "flex", flexDirection: "column",
-                alignItems: "center", gap: 0,
+                position: "relative",
+                zIndex: 2,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: 0,
                 userSelect: "none",
-                padding: "0 12px",
+                padding: isSmallMobile ? "0 6px" : "0 12px",
                 textAlign: "center",
+                maxWidth: "100%",
               }}
             >
               {/* CTS wordmark */}
-              <div style={{ marginBottom: 10 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 6, justifyContent: "center", marginBottom: 4 }}>
-                  <div style={{ width: 22, height: 1, background: "linear-gradient(to right, transparent, rgba(210,170,60,0.7))" }} />
-                  <span style={{
+              <div style={{ marginBottom: isMobile ? 6 : 10 }}>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6,
+                    justifyContent: "center",
+                    marginBottom: 4,
+                  }}
+                >
+                  <div
+                    style={{
+                      width: isSmallMobile ? 14 : 22,
+                      height: 1,
+                      background: "linear-gradient(to right, transparent, rgba(210,170,60,0.7))",
+                    }}
+                  />
+                  <span
+                    style={{
+                      fontFamily: "'Oswald','Aspekta',sans-serif",
+                      fontWeight: 700,
+                      fontSize: "clamp(11px, 4.2vw, 18px)",
+                      letterSpacing: "0.18em",
+                      color: "rgba(230,200,100,0.95)",
+                      textTransform: "uppercase",
+                      lineHeight: 1,
+                    }}
+                  >
+                    CTS
+                  </span>
+                  <div
+                    style={{
+                      width: isSmallMobile ? 14 : 22,
+                      height: 1,
+                      background: "linear-gradient(to left, transparent, rgba(210,170,60,0.7))",
+                    }}
+                  />
+                </div>
+                <div
+                  style={{
                     fontFamily: "'Oswald','Aspekta',sans-serif",
-                    fontWeight: 700,
-                    fontSize: "clamp(13px, 1.8vw, 18px)",
-                    letterSpacing: "0.18em",
-                    color: "rgba(230,200,100,0.95)",
+                    fontWeight: 400,
+                    fontSize: "clamp(7px, 2.4vw, 11px)",
+                    letterSpacing: "0.32em",
+                    color: "rgba(210,175,80,0.75)",
                     textTransform: "uppercase",
                     lineHeight: 1,
-                  }}>CTS</span>
-                  <div style={{ width: 22, height: 1, background: "linear-gradient(to left, transparent, rgba(210,170,60,0.7))" }} />
+                  }}
+                >
+                  TYRES
                 </div>
-                <div style={{
-                  fontFamily: "'Oswald','Aspekta',sans-serif",
-                  fontWeight: 400,
-                  fontSize: "clamp(8px, 1vw, 11px)",
-                  letterSpacing: "0.38em",
-                  color: "rgba(210,175,80,0.75)",
-                  textTransform: "uppercase",
-                  lineHeight: 1,
-                }}>TYRES</div>
               </div>
 
-              <div style={{ width: 40, height: 1, background: "rgba(210,170,60,0.35)", marginBottom: 12 }} />
+              <div
+                style={{
+                  width: isSmallMobile ? 28 : 40,
+                  height: 1,
+                  background: "rgba(210,170,60,0.35)",
+                  marginBottom: isMobile ? 8 : 12,
+                }}
+              />
 
-              <div style={{
-                fontFamily: "'Oswald','Aspekta',sans-serif",
-                fontWeight: 400,
-                fontSize: "clamp(10px, 1.4vw, 14px)",
-                letterSpacing: "0.22em",
-                color: "rgba(220,195,120,0.88)",
-                textTransform: "uppercase",
-                lineHeight: 1,
-                marginBottom: 4,
-              }}>DRIVEN BEYOND</div>
-
-              <div style={{
-                fontFamily: "'Oswald','Aspekta',sans-serif",
-                fontWeight: 700,
-                fontSize: "clamp(16px, 2.4vw, 26px)",
-                letterSpacing: "0.14em",
-                color: "rgba(235,205,100,1)",
-                textTransform: "uppercase",
-                lineHeight: 1,
-                marginBottom: 14,
-              }}>LIMITS</div>
-
-              <motion.div
-                animate={{ letterSpacing: hovered ? "0.24em" : "0.18em" }}
-                transition={{ duration: 0.4, ease: "easeOut" }}
+              <div
                 style={{
                   fontFamily: "'Oswald','Aspekta',sans-serif",
-                  fontWeight: 300,
-                  fontSize: "clamp(7px, 0.9vw, 10px)",
-                  letterSpacing: "0.18em",
-                  color: "rgba(200,175,90,0.65)",
+                  fontWeight: 400,
+                  fontSize: "clamp(8px, 3vw, 14px)",
+                  letterSpacing: "0.2em",
+                  color: "rgba(220,195,120,0.88)",
                   textTransform: "uppercase",
                   lineHeight: 1,
-                  marginBottom: 12,
+                  marginBottom: 4,
                 }}
-              >STEP INTO OUR WORLD</motion.div>
+              >
+                DRIVEN BEYOND
+              </div>
+
+              <div
+                style={{
+                  fontFamily: "'Oswald','Aspekta',sans-serif",
+                  fontWeight: 700,
+                  fontSize: "clamp(13px, 5vw, 26px)",
+                  letterSpacing: "0.12em",
+                  color: "rgba(235,205,100,1)",
+                  textTransform: "uppercase",
+                  lineHeight: 1,
+                  marginBottom: isMobile ? 8 : 14,
+                }}
+              >
+                LIMITS
+              </div>
+
+              {!isSmallMobile && (
+                <motion.div
+                  animate={{ letterSpacing: hovered ? "0.24em" : "0.18em" }}
+                  transition={{ duration: 0.4, ease: "easeOut" }}
+                  style={{
+                    fontFamily: "'Oswald','Aspekta',sans-serif",
+                    fontWeight: 300,
+                    fontSize: "clamp(6px, 1.8vw, 10px)",
+                    letterSpacing: "0.18em",
+                    color: "rgba(200,175,90,0.65)",
+                    textTransform: "uppercase",
+                    lineHeight: 1,
+                    marginBottom: 10,
+                  }}
+                >
+                  STEP INTO OUR WORLD
+                </motion.div>
+              )}
 
               <motion.div
-                animate={{ y: hovered ? [0, 4, 0] : [0, 2, 0], opacity: hovered ? 0.9 : 0.5 }}
+                animate={{
+                  y: hovered ? [0, 4, 0] : [0, 2, 0],
+                  opacity: hovered ? 0.9 : 0.5,
+                }}
                 transition={{ duration: 1.1, repeat: Infinity, ease: "easeInOut" }}
                 style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}
               >
-                <svg width="16" height="10" viewBox="0 0 16 10" fill="none">
-                  <path d="M1 1L8 8L15 1" stroke="rgba(210,175,70,0.8)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                <svg width="14" height="9" viewBox="0 0 16 10" fill="none">
+                  <path
+                    d="M1 1L8 8L15 1"
+                    stroke="rgba(210,175,70,0.8)"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
                 </svg>
-                <svg width="16" height="10" viewBox="0 0 16 10" fill="none" style={{ marginTop: -4 }}>
-                  <path d="M1 1L8 8L15 1" stroke="rgba(210,175,70,0.45)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                <svg width="14" height="9" viewBox="0 0 16 10" fill="none" style={{ marginTop: -4 }}>
+                  <path
+                    d="M1 1L8 8L15 1"
+                    stroke="rgba(210,175,70,0.45)"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
                 </svg>
               </motion.div>
             </motion.div>
@@ -392,7 +556,8 @@ export default function IntroScreen({ onEnter }: IntroScreenProps) {
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.75, delay: 0.15 }}
                 style={{
-                  position: "absolute", inset: 0,
+                  position: "absolute",
+                  inset: 0,
                   background: "#050505",
                   zIndex: 20,
                   pointerEvents: "none",

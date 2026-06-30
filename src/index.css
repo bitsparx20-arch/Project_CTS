@@ -1,13 +1,14 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&display=swap');
 
-/* â”€â”€â”€ RESET & BASE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* â”€â”€â”€ RESET & BASE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
-/* â”€â”€â”€ THEME CUSTOM PROPERTIES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* â”€â”€â”€ THEME CUSTOM PROPERTIES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 :root, [data-theme="dark"] {
   --red: #e63c2f;
   --red-deep: #C03020;
@@ -24,6 +25,12 @@
   --nav-border: rgba(255,255,255,0.08);
   --nav-link-color: rgba(255,255,255,0.72);
   --nav-link-active: #ffffff;
+  --nav-hairline: rgba(245,168,0,0.18);
+  --nav-drawer-bg: rgba(5,5,5,0.97);
+  --nav-row-sep: rgba(255,255,255,0.05);
+  --nav-ham-color: #ffffff;
+  --nav-grad-start: #F5A800;
+  --nav-grad-end: #D4D4D4;
 
   /* card / surface */
   --surface: rgba(255,255,255,0.04);
@@ -68,10 +75,16 @@
   --radius: 10px;
 
   /* nav */
-  --nav-bg-scrolled: rgba(250,247,240,0.94);
+  --nav-bg-scrolled: rgba(250,247,240,0.96);
   --nav-border: rgba(0,0,0,0.08);
-  --nav-link-color: rgba(26,26,20,0.72);
+  --nav-link-color: rgba(26,26,20,0.70);
   --nav-link-active: #1A1A14;
+  --nav-hairline: rgba(200,136,10,0.20);
+  --nav-drawer-bg: rgba(250,247,240,0.98);
+  --nav-row-sep: rgba(0,0,0,0.05);
+  --nav-ham-color: #1A1A14;
+  --nav-grad-start: #C8880A;
+  --nav-grad-end: #888888;
 
   /* card / surface */
   --surface: rgba(0,0,0,0.03);
@@ -104,12 +117,10 @@
   --toggle-icon-color: #1A1A14;
 }
 
-/* â”€â”€â”€ SMOOTH THEME TRANSITIONS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* â”€â”€â”€ SMOOTH THEME TRANSITIONS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 html {
   scroll-behavior: smooth;
-  transition:
-    background-color 0.3s ease,
-    color 0.3s ease;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 body {
@@ -119,9 +130,7 @@ body {
   line-height: 1.6;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
-  transition:
-    background-color 0.3s ease,
-    color 0.3s ease;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* Animate all backgrounds / colors smoothly on theme change */
@@ -131,7 +140,7 @@ body {
   transition-timing-function: ease;
 }
 
-/* But don't animate transforms/opacity (breaks animations) */
+/* Don't animate transforms/opacity (breaks animations) */
 [style*="transform"], [style*="opacity"],
 .framer-motion, [data-framer-motion] {
   transition-property: background-color, border-color, color !important;
@@ -139,13 +148,13 @@ body {
 
 img { max-width: 100%; display: block; }
 
-/* â”€â”€â”€ SELECTION â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* â”€â”€â”€ SELECTION â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 ::selection {
   background: var(--accent);
   color: #fff;
 }
 
-/* â”€â”€â”€ SHARED SECTION UTILITIES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* â”€â”€â”€ SHARED SECTION UTILITIES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .section-label {
   display: block;
   font-size: 0.75rem;
@@ -179,7 +188,7 @@ img { max-width: 100%; display: block; }
   margin: 0 auto 36px;
 }
 
-/* â”€â”€â”€ SHARED BUTTONS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* â”€â”€â”€ SHARED BUTTONS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .btn {
   display: inline-block;
   padding: 14px 34px;
@@ -195,7 +204,7 @@ img { max-width: 100%; display: block; }
 .btn-primary:hover { opacity: 0.88; }
 
 .btn-outline { background: transparent; color: #fff; border: 2px solid #fff; font-weight: 600; }
-.btn-outline:hover { background: rgba(255, 255, 255, 0.12); }
+.btn-outline:hover { background: rgba(255,255,255,0.12); }
 
 .btn-outline-dark {
   background: transparent;
@@ -204,7 +213,7 @@ img { max-width: 100%; display: block; }
 }
 .btn-outline-dark:hover { background: var(--text); color: var(--bg); }
 
-/* â”€â”€â”€ BRAND LOGO â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* â”€â”€â”€ BRAND LOGO â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .brand-logo {
   display: flex;
   align-items: center;
@@ -220,7 +229,7 @@ img { max-width: 100%; display: block; }
 
 .brand-logo:hover .brand-logo-image { transform: scale(1.05); }
 
-/* â”€â”€â”€ NAVBAR â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* â”€â”€â”€ NAVBAR â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .main-nav {
   position: fixed;
   top: 0; left: 0; right: 0;
@@ -231,7 +240,7 @@ img { max-width: 100%; display: block; }
   box-shadow: 0 2px 16px rgba(0,0,0,0.35);
 }
 
-/* â”€â”€â”€ THEME TOGGLE BUTTON â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* â”€â”€â”€ THEME TOGGLE BUTTON â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .theme-toggle-btn {
   display: flex;
   align-items: center;
@@ -264,7 +273,214 @@ img { max-width: 100%; display: block; }
   transition: none !important;
 }
 
-/* â”€â”€â”€ HOME HERO â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* â”€â”€â”€ CTS NAV (Oswald navbar) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.cts-nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 1000;
+  transition: background 0.35s ease, backdrop-filter 0.35s ease, border-color 0.35s ease;
+}
+.cts-nav.is-top {
+  background: transparent;
+  border-bottom: 1px solid transparent;
+  backdrop-filter: none;
+}
+.cts-nav.is-scrolled {
+  background: var(--nav-bg-scrolled);
+  border-bottom: 1px solid var(--nav-border);
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+}
+
+.cts-nav-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 clamp(20px, 4vw, 56px);
+  height: 76px;
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+
+.cts-nav-logo {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.cts-nav-links {
+  display: flex;
+  align-items: center;
+  gap: clamp(20px, 3vw, 48px);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  flex: 1;
+  justify-content: center;
+}
+
+.cts-nav-link {
+  font-family: 'Oswald', sans-serif;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--nav-link-color);
+  text-decoration: none;
+  position: relative;
+  padding: 4px 0;
+  white-space: nowrap;
+  transition: color 0.2s ease;
+}
+.cts-nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  right: 50%;
+  height: 1px;
+  background: linear-gradient(to right, var(--nav-grad-start), var(--nav-grad-end));
+  transition: left 0.28s cubic-bezier(.22,1,.36,1), right 0.28s cubic-bezier(.22,1,.36,1);
+}
+.cts-nav-link:hover,
+.cts-nav-link.is-active {
+  color: var(--nav-link-active);
+}
+.cts-nav-link:hover::after,
+.cts-nav-link.is-active::after {
+  left: 0;
+  right: 0;
+}
+.cts-nav-link.is-active {
+  background: linear-gradient(to right, var(--nav-grad-start), var(--nav-grad-end));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+.cts-nav-right-desktop {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+  margin-left: 14px;
+}
+
+.cts-theme-btn:hover {
+  background: var(--accent) !important;
+  border-color: var(--accent) !important;
+  color: #fff !important;
+  transform: scale(1.08);
+}
+
+.cts-nav-toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  width: 40px;
+  height: 40px;
+  background: none;
+  border: 1px solid var(--nav-hairline);
+  border-radius: 8px;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+  margin-left: 8px;
+}
+.cts-nav-toggle span {
+  display: block;
+  width: 20px;
+  height: 1.5px;
+  background: var(--nav-ham-color);
+  border-radius: 2px;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+  transform-origin: center;
+}
+.cts-nav-toggle.is-open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
+.cts-nav-toggle.is-open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+.cts-nav-toggle.is-open span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
+
+/* â”€â”€â”€ MOBILE DRAWER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+@media (max-width: 860px) {
+  .cts-nav-toggle { display: flex; }
+  .cts-nav-links  { display: none; }
+  .cts-nav-right-desktop { display: none; }
+
+  .cts-mobile-drawer {
+    position: fixed;
+    top: 76px;
+    left: 0;
+    right: 0;
+    z-index: 999;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    background: var(--nav-drawer-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--nav-hairline);
+    padding: 20px 24px 28px;
+    transform: translateY(-110%);
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 0.38s cubic-bezier(.22,1,.36,1), opacity 0.38s;
+  }
+  .cts-mobile-drawer.is-open {
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .cts-mobile-links {
+    display: flex;
+    flex-direction: column;
+    list-style: none;
+    margin: 0 0 16px;
+    padding: 0 0 16px;
+    border-bottom: 1px solid var(--nav-hairline);
+    gap: 0;
+  }
+  .cts-mobile-links li a {
+    font-family: 'Oswald', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--nav-link-color);
+    text-decoration: none;
+    display: block;
+    padding: 13px 0;
+    border-bottom: 1px solid var(--nav-row-sep);
+    transition: color 0.2s;
+  }
+  .cts-mobile-links li a:hover,
+  .cts-mobile-links li a.is-active {
+    color: var(--nav-link-active);
+  }
+
+  .cts-mobile-theme-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 8px;
+    font-family: 'Oswald', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--nav-link-color);
+  }
+}
+
+@media (min-width: 861px) {
+  .cts-mobile-drawer { display: none !important; }
+}
+
+/* â”€â”€â”€ HOME HERO â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .home-hero {
   position: relative;
   height: 100vh;
@@ -311,7 +527,7 @@ img { max-width: 100%; display: block; }
   flex-wrap: wrap;
 }
 
-/* â”€â”€â”€ TIRE FINDER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* â”€â”€â”€ TIRE FINDER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .finder-section {
   padding: 70px 8% 60px;
   background: var(--bg);
@@ -360,10 +576,9 @@ img { max-width: 100%; display: block; }
   justify-content: center;
   transition: opacity 0.2s !important;
 }
-
 .finder-search-btn:hover { opacity: 0.88; }
 
-/* â”€â”€â”€ BRANDS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* â”€â”€â”€ BRANDS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .brands-section {
   padding: 60px 8%;
   background: var(--bg-alt);
@@ -390,7 +605,7 @@ img { max-width: 100%; display: block; }
   color: var(--text);
 }
 
-/* â”€â”€â”€ CATEGORIES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* â”€â”€â”€ CATEGORIES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .categories-section {
   padding: 70px 8%;
   background: var(--bg);
@@ -411,7 +626,6 @@ img { max-width: 100%; display: block; }
   background: var(--card-bg);
   transition: box-shadow 0.25s, transform 0.25s !important;
 }
-
 .cat-card:hover {
   box-shadow: 0 10px 30px rgba(0,0,0,0.10);
   transform: translateY(-3px);
@@ -453,7 +667,7 @@ img { max-width: 100%; display: block; }
   line-height: 1.6;
 }
 
-/* â”€â”€â”€ WHY CTS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* â”€â”€â”€ WHY CTS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .why-section {
   padding: 70px 8%;
   background: #1a1a1a;
@@ -503,7 +717,7 @@ img { max-width: 100%; display: block; }
   line-height: 1.6;
 }
 
-/* â”€â”€â”€ REVIEWS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* â”€â”€â”€ REVIEWS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .reviews-section {
   padding: 70px 8%;
   background: var(--bg-alt);
@@ -537,7 +751,6 @@ img { max-width: 100%; display: block; }
   visibility: hidden;
   transition: opacity 0.35s ease !important;
 }
-
 .review-card.active {
   position: relative;
   opacity: 1;
@@ -575,7 +788,6 @@ img { max-width: 100%; display: block; }
   flex-shrink: 0;
   transition: background 0.2s !important;
 }
-
 .slider-arrow:hover { background: var(--bg-alt); }
 
 .slider-dots {
@@ -595,14 +807,13 @@ img { max-width: 100%; display: block; }
   padding: 0;
   transition: width 0.25s, border-radius 0.25s !important;
 }
-
 .dot.active {
   background: var(--red);
   width: 22px;
   border-radius: 4px;
 }
 
-/* â”€â”€â”€ PAGE GRIDS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* â”€â”€â”€ PAGE GRIDS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .services-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -616,7 +827,6 @@ img { max-width: 100%; display: block; }
   border-radius: 12px;
   overflow: hidden;
 }
-
 .tyres-grid > div { border-right: 1px solid var(--border); }
 .tyres-grid > div:last-child { border-right: none; }
 
@@ -627,8 +837,7 @@ img { max-width: 100%; display: block; }
 .contact-grid { display: grid; grid-template-columns: 1fr 1.4fr; gap: 24px; }
 .contact-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
-/* â”€â”€â”€ FOOTER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
-/* Footer always remains dark â€” brand identity */
+/* â”€â”€â”€ FOOTER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .site-footer {
   background: var(--dark);
   color: #b7b7bd;
@@ -669,7 +878,6 @@ img { max-width: 100%; display: block; }
   font-weight: 700;
   transition: background 0.2s !important;
 }
-
 .social-icon:hover { background: var(--red); }
 
 .footer-col h4 {
@@ -688,7 +896,6 @@ img { max-width: 100%; display: block; }
   font-size: 1rem;
   transition: color 0.2s !important;
 }
-
 .footer-col a:hover { color: var(--red); }
 
 .contact-item {
@@ -721,10 +928,9 @@ img { max-width: 100%; display: block; }
   text-decoration: none;
   transition: color 0.2s !important;
 }
-
 .footer-legal a:hover { color: var(--red); }
 
-/* â”€â”€â”€ 404 â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* â”€â”€â”€ 404 â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .notfound {
   min-height: 72vh;
   display: flex;
@@ -765,7 +971,7 @@ img { max-width: 100%; display: block; }
   justify-content: center;
 }
 
-/* â”€â”€â”€ HERO DECO + SCROLL HINT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* â”€â”€â”€ HERO DECO + SCROLL HINT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .home-hero-bg {
   position: absolute;
   inset: 0;
@@ -778,11 +984,11 @@ img { max-width: 100%; display: block; }
   pointer-events: none;
   z-index: 1;
 }
-.hero-deco--left { left: -60px; top: 20%; }
+.hero-deco--left  { left: -60px;  top: 20%; }
 .hero-deco--right { right: -40px; top: 50%; }
-.hero-deco--tl { top: 10%; left: -80px; }
-.hero-deco--br { bottom: 8%; right: -60px; }
-.hero-deco--mid { top: 40%; left: 60%; }
+.hero-deco--tl    { top: 10%;    left: -80px; }
+.hero-deco--br    { bottom: 8%;  right: -60px; }
+.hero-deco--mid   { top: 40%;    left: 60%; }
 
 .hero-deco-circle {
   width: 320px;
@@ -817,7 +1023,7 @@ img { max-width: 100%; display: block; }
   transform-origin: top;
 }
 
-/* â”€â”€â”€ HERO INLINE FINDER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* â”€â”€â”€ HERO INLINE FINDER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .home-hero-finder {
   display: flex;
   flex-wrap: wrap;
@@ -849,12 +1055,10 @@ img { max-width: 100%; display: block; }
   background-position: right 12px center;
   padding-right: 34px;
 }
-
 .home-hero-finder select option {
   background: #1a1a1a;
   color: #fff;
 }
-
 .home-hero-finder select:disabled {
   opacity: 0.4;
   cursor: not-allowed;
@@ -868,13 +1072,11 @@ img { max-width: 100%; display: block; }
   border-radius: 6px;
 }
 
-/* â”€â”€â”€ LIGHT MODE: page sections with dark section overrides â”€â”€ */
-/* Pages use inline styles heavily, so CSS variables do the work */
+/* â”€â”€â”€ LIGHT MODE OVERRIDES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 [data-theme="light"] .app-shell {
   background: var(--bg);
 }
 
-/* Inputs in light mode */
 [data-theme="light"] input,
 [data-theme="light"] select,
 [data-theme="light"] textarea {
@@ -888,12 +1090,12 @@ img { max-width: 100%; display: block; }
   color: var(--input-placeholder);
 }
 
-/* â”€â”€â”€ RESPONSIVE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* â”€â”€â”€ RESPONSIVE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 @media (max-width: 1024px) {
-  .cat-grid { grid-template-columns: repeat(2, 1fr); }
-  .services-grid { grid-template-columns: repeat(2, 1fr); }
-  .tyres-grid { grid-template-columns: repeat(3, 1fr); }
-  .footer-grid { grid-template-columns: 1fr 1fr; }
+  .cat-grid       { grid-template-columns: repeat(2, 1fr); }
+  .services-grid  { grid-template-columns: repeat(2, 1fr); }
+  .tyres-grid     { grid-template-columns: repeat(3, 1fr); }
+  .footer-grid    { grid-template-columns: 1fr 1fr; }
   .footer-grid > div:first-child { grid-column: 1 / -1; }
 }
 
@@ -908,12 +1110,12 @@ img { max-width: 100%; display: block; }
     flex: none;
   }
 
-  .why-grid { grid-template-columns: 1fr; gap: 18px; }
+  .why-grid      { grid-template-columns: 1fr; gap: 18px; }
   .services-grid { grid-template-columns: 1fr; }
-  .tyres-grid { grid-template-columns: repeat(2, 1fr); }
-  .about-grid { grid-template-columns: 1fr; }
-  .about-cards { grid-template-columns: 1fr; }
-  .contact-grid { grid-template-columns: 1fr; }
+  .tyres-grid    { grid-template-columns: repeat(2, 1fr); }
+  .about-grid    { grid-template-columns: 1fr; }
+  .about-cards   { grid-template-columns: 1fr; }
+  .contact-grid  { grid-template-columns: 1fr; }
 
   .footer-grid {
     grid-template-columns: 1fr;
@@ -922,19 +1124,19 @@ img { max-width: 100%; display: block; }
   }
   .footer-grid > div:first-child { grid-column: auto; }
   .footer-brand-p { margin: 0 auto 18px; }
-  .socials { justify-content: center; }
-  .footer-bottom { justify-content: center; text-align: center; }
+  .socials        { justify-content: center; }
+  .footer-bottom  { justify-content: center; text-align: center; }
 
   .slider-wrapper { gap: 8px; }
-  .slider-arrow { width: 34px; height: 34px; font-size: 1rem; }
+  .slider-arrow   { width: 34px; height: 34px; font-size: 1rem; }
 }
 
 @media (max-width: 480px) {
-  .cat-grid { grid-template-columns: 1fr; }
-  .tyres-grid { grid-template-columns: 1fr; }
-  .contact-form-row { grid-template-columns: 1fr; }
-  .finder-grid { flex-direction: column; }
+  .cat-grid          { grid-template-columns: 1fr; }
+  .tyres-grid        { grid-template-columns: 1fr; }
+  .contact-form-row  { grid-template-columns: 1fr; }
+  .finder-grid       { flex-direction: column; }
   .finder-grid select,
   .finder-search-btn { width: 100%; }
-  .review-card { padding: 24px 18px; }
+  .review-card       { padding: 24px 18px; }
 }

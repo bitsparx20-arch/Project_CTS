@@ -46,10 +46,7 @@ const SvTheme = createContext<SvTokens>(getSTokens(true));
 const useSvT  = () => useContext(SvTheme);
 
 /* ============================================================================
-   PLASMA BACKGROUND (same as Tyres.tsx)
-   ========================================================================== */
-/* ============================================================================
-   LUXURY AURORA BACKGROUND
+   PLASMA BACKGROUND — theme-aware: dark canvas in dark mode, warm canvas in light
    ========================================================================== */
 interface PlasmaBgProps {
   color?: string; speed?: number;
@@ -57,14 +54,18 @@ interface PlasmaBgProps {
   scale?: number; opacity?: number;
   mouseInteractive?: boolean;
   style?: React.CSSProperties;
+  isDark?: boolean;
 }
 function PlasmaBg({
   color = "#C9A84C", speed = 1, direction = "forward",
   scale = 1, opacity = 1, mouseInteractive = true, style,
+  isDark = true,
 }: PlasmaBgProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const mousePos = useRef({ x: 0.5, y: 0.5 });
+  const isDarkRef = useRef(isDark);
+  isDarkRef.current = isDark;
 
   useEffect(() => {
     const container = containerRef.current;
@@ -113,31 +114,34 @@ function PlasmaBg({
       const W = canvas.width, H = canvas.height;
       if (!W || !H) return;
 
-      // Deep background
-      ctx.fillStyle = "#080604";
+      const dark = isDarkRef.current;
+
+      // Background — dark mode: near-black, light mode: warm cream
+      ctx.fillStyle = dark ? "#080604" : "#F0EBE0";
       ctx.fillRect(0, 0, W, H);
 
       const mx = mouseInteractive ? mousePos.current.x : 0.5;
       const my = mouseInteractive ? mousePos.current.y : 0.5;
 
-      // Aurora bands
+      // Aurora bands — stronger/more visible in dark, subtle in light
       const auroraColors = [
-        { h: 35, s: 80, l: 28 },   // warm gold
-        { h: 45, s: 70, l: 22 },   // amber
-        { h: 30, s: 60, l: 18 },   // bronze
+        { h: 35, s: 80, l: dark ? 28 : 55 },
+        { h: 45, s: 70, l: dark ? 22 : 48 },
+        { h: 30, s: 60, l: dark ? 18 : 42 },
       ];
       for (let i = 0; i < 3; i++) {
         const c = auroraColors[i];
         const yBase = (0.3 + i * 0.18 + Math.sin(t * 0.7 + i * 1.1) * 0.08 + (my - 0.5) * 0.06) * H;
         const xShift = (mx - 0.5) * W * 0.1;
         const grad = ctx.createLinearGradient(xShift, yBase - H * 0.22, xShift + W * 0.3, yBase + H * 0.22);
-        const alpha = (0.04 + Math.sin(t + i) * 0.02) * opacity;
+        const alpha = (dark ? 0.04 : 0.07) + Math.sin(t + i) * (dark ? 0.02 : 0.03);
+        const finalAlpha = alpha * opacity;
         grad.addColorStop(0, `hsla(${c.h},${c.s}%,${c.l}%,0)`);
-        grad.addColorStop(0.35, `hsla(${c.h},${c.s}%,${c.l}%,${alpha})`);
-        grad.addColorStop(0.65, `hsla(${c.h + 5},${c.s - 10}%,${c.l + 5}%,${alpha * 0.7})`);
+        grad.addColorStop(0.35, `hsla(${c.h},${c.s}%,${c.l}%,${finalAlpha})`);
+        grad.addColorStop(0.65, `hsla(${c.h + 5},${c.s - 10}%,${c.l + 5}%,${finalAlpha * 0.7})`);
         grad.addColorStop(1, `hsla(${c.h},${c.s}%,${c.l}%,0)`);
         ctx.save();
-        ctx.globalCompositeOperation = "screen";
+        ctx.globalCompositeOperation = dark ? "screen" : "multiply";
         for (let band = 0; band < 2; band++) {
           ctx.beginPath();
           ctx.moveTo(-W * 0.1 + xShift, 0);
@@ -155,16 +159,22 @@ function PlasmaBg({
         ctx.restore();
       }
 
-      // Twinkle stars
+      // Sparkle dots — gold in dark, amber-warm in light
       ctx.save();
-      ctx.globalCompositeOperation = "screen";
+      ctx.globalCompositeOperation = dark ? "screen" : "multiply";
       for (const star of stars) {
         const twinkle = 0.4 + 0.6 * Math.abs(Math.sin(t * star.speed + star.twinkle));
-        const a = twinkle * opacity * 0.8;
+        const a = twinkle * opacity * (dark ? 0.8 : 0.35);
+        const starColor = dark
+          ? `rgba(245,237,216,${a})`
+          : `rgba(140,90,10,${a})`;
+        const starGlow = dark
+          ? `rgba(201,168,76,${a * 0.5})`
+          : `rgba(168,114,10,${a * 0.4})`;
         const grd = ctx.createRadialGradient(star.x * W, star.y * H, 0, star.x * W, star.y * H, star.r * 2.5);
-        grd.addColorStop(0, `rgba(245,237,216,${a})`);
-        grd.addColorStop(0.4, `rgba(201,168,76,${a * 0.5})`);
-        grd.addColorStop(1, `rgba(201,168,76,0)`);
+        grd.addColorStop(0, starColor);
+        grd.addColorStop(0.4, starGlow);
+        grd.addColorStop(1, dark ? `rgba(201,168,76,0)` : `rgba(168,114,10,0)`);
         ctx.beginPath();
         ctx.arc(star.x * W, star.y * H, star.r * 2.5, 0, Math.PI * 2);
         ctx.fillStyle = grd;
@@ -172,10 +182,15 @@ function PlasmaBg({
       }
       ctx.restore();
 
-      // Subtle vignette
+      // Vignette — dark edges in dark mode, light warm fade in light mode
       const vig = ctx.createRadialGradient(W / 2, H / 2, H * 0.2, W / 2, H / 2, H * 0.85);
-      vig.addColorStop(0, "rgba(0,0,0,0)");
-      vig.addColorStop(1, "rgba(0,0,0,0.55)");
+      if (dark) {
+        vig.addColorStop(0, "rgba(0,0,0,0)");
+        vig.addColorStop(1, "rgba(0,0,0,0.55)");
+      } else {
+        vig.addColorStop(0, "rgba(240,235,224,0)");
+        vig.addColorStop(1, "rgba(220,210,190,0.4)");
+      }
       ctx.fillStyle = vig;
       ctx.fillRect(0, 0, W, H);
     };
@@ -450,8 +465,7 @@ function Reveal({ children, delay = 0, style }: { children: React.ReactNode; del
 /* ============================================================================
    PARTICLE FIELD
    ========================================================================== */
-function SvParticleField() {
-  const svT = useSvT();
+function SvParticleField({ isDark = true }: { isDark?: boolean }) {
   const particles = useMemo(() =>
     Array.from({ length: 20 }, (_, i) => ({
       id: i, x: Math.random() * 100,
@@ -459,16 +473,23 @@ function SvParticleField() {
       delay: Math.random() * 6, dur: Math.random() * 8 + 6,
       color: i % 3 === 0 ? CYAN : i % 3 === 1 ? PURPLE : PINK,
     })), []);
+
+  // In light mode use more muted/amber particles so they're visible on warm bg
+  const lightColors = ["#A8720A", "#8C6D2F", "#D4A830"];
+
   return (
     <div style={{ position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none" }}>
-      {particles.map((p) => (
-        <div key={p.id} style={{
-          position: "absolute", bottom: "-10px", left: `${p.x}%`,
-          width: p.size, height: p.size, borderRadius: "50%",
-          background: p.color, boxShadow: `0 0 ${p.size * 3}px ${p.color}`,
-          animation: `particleDrift ${p.dur}s ${p.delay}s linear infinite`, opacity: 0,
-        }} />
-      ))}
+      {particles.map((p, i) => {
+        const col = isDark ? p.color : lightColors[i % 3];
+        return (
+          <div key={p.id} style={{
+            position: "absolute", bottom: "-10px", left: `${p.x}%`,
+            width: p.size, height: p.size, borderRadius: "50%",
+            background: col, boxShadow: `0 0 ${p.size * 3}px ${col}`,
+            animation: `particleDrift ${p.dur}s ${p.delay}s linear infinite`, opacity: 0,
+          }} />
+        );
+      })}
     </div>
   );
 }
@@ -509,13 +530,26 @@ function ServiceIcon({ id, size = 20 }: { id: number; size?: number }) {
    BRAND TICKER
    ========================================================================== */
 const BRANDS = ["MRF","CEAT","APOLLO","JK TYRE","TVS","BIRLA TYRES","BALKRISHNA","PTL","KAMA KUHMO","SPEEDWAYS"];
-function BrandTicker() {
+function BrandTicker({ isDark = true }: { isDark?: boolean }) {
   const doubled = [...BRANDS, ...BRANDS];
   return (
-    <div style={{ overflow: "hidden", borderTop: `1px solid var(--cv-border)`, borderBottom: `1px solid var(--cv-border)`, padding: "18px 0", background: `rgba(3,4,10,0.8)`, backdropFilter: "blur(8px)" }}>
+    <div style={{
+      overflow: "hidden",
+      borderTop: `1px solid var(--cv-border)`,
+      borderBottom: `1px solid var(--cv-border)`,
+      padding: "18px 0",
+      background: isDark ? `rgba(3,4,10,0.8)` : `rgba(232,226,214,0.9)`,
+      backdropFilter: "blur(8px)",
+    }}>
       <div className="sv-ticker-track">
         {doubled.map((b, i) => (
-          <span key={i} style={{ display: "inline-flex", alignItems: "center", gap: 28, paddingRight: 48, fontFamily: MONO, fontSize: 11, fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(232,244,255,0.22)", whiteSpace: "nowrap" }}>
+          <span key={i} style={{
+            display: "inline-flex", alignItems: "center", gap: 28, paddingRight: 48,
+            fontFamily: MONO, fontSize: 11, fontWeight: 700, letterSpacing: "0.22em",
+            textTransform: "uppercase",
+            color: isDark ? "rgba(232,244,255,0.22)" : "rgba(90,65,20,0.35)",
+            whiteSpace: "nowrap",
+          }}>
             {b}
             <span style={{ width: 4, height: 4, borderRadius: "50%", background: `rgba(201,168,76,0.6)`, display: "inline-block" }} />
           </span>
@@ -528,8 +562,7 @@ function BrandTicker() {
 /* ============================================================================
    HERO — half-height split: editorial left + Plasma right
    ========================================================================== */
-function HeroSection() {
-  const svT = useSvT();
+function HeroSection({ isDark = true }: { isDark?: boolean }) {
   return (
     <section style={{ position: "relative", overflow: "hidden", background: "var(--cv-bg)" }}>
       <div className="sv-hero-inner" style={{ display: "flex", alignItems: "stretch", minHeight: "52vh" }}>
@@ -540,7 +573,9 @@ function HeroSection() {
           flex: "0 0 55%",
           display: "flex", flexDirection: "column", justifyContent: "center",
           padding: "clamp(64px,8vh,100px) clamp(28px,5vw,80px) clamp(48px,6vh,80px) clamp(40px,6vw,96px)",
-          background: `linear-gradient(to right, var(--cv-bg) 70%, rgba(3,4,10,0.88) 100%)`,
+          background: isDark
+            ? `linear-gradient(to right, var(--cv-bg) 70%, rgba(3,4,10,0.88) 100%)`
+            : `linear-gradient(to right, var(--cv-bg) 70%, rgba(240,235,224,0.88) 100%)`,
         }}>
           {/* Eyebrow */}
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
@@ -599,32 +634,38 @@ function HeroSection() {
 
           {/* Watermark */}
           <div style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%) rotate(-90deg)", zIndex: 6, pointerEvents: "none" }}>
-            <span style={{ fontFamily: MONO, fontSize: 8.5, letterSpacing: "0.32em", textTransform: "uppercase", color: "rgba(232,244,255,0.07)", fontWeight: 700, whiteSpace: "nowrap" }}>
+            <span style={{ fontFamily: MONO, fontSize: 8.5, letterSpacing: "0.32em", textTransform: "uppercase", color: isDark ? "rgba(232,244,255,0.07)" : "rgba(90,65,20,0.07)", fontWeight: 700, whiteSpace: "nowrap" }}>
               CTS TYRES — WORKSHOP SERVICES
             </span>
           </div>
         </div>
 
-        {/* RIGHT — Plasma background (replaces Prism) */}
+        {/* RIGHT — Plasma background, fully theme-aware */}
         <div className="sv-hero-right" style={{ flex: 1, position: "relative", overflow: "hidden" }}>
-          {/* Bleed fade on left edge */}
-          <div style={{ position: "absolute", top: 0, bottom: 0, left: 0, width: 160, background: `linear-gradient(to right,var(--cv-bg),transparent)`, zIndex: 2, pointerEvents: "none" }} />
-          {/* Plasma */}
+          {/* Bleed fade on left edge — matches the page bg color so no hard cut */}
+          <div style={{
+            position: "absolute", top: 0, bottom: 0, left: 0, width: 160,
+            background: isDark
+              ? `linear-gradient(to right, #080604, transparent)`
+              : `linear-gradient(to right, #F0EBE0, transparent)`,
+            zIndex: 2, pointerEvents: "none",
+          }} />
+          {/* Plasma — pass isDark so canvas bg colour matches page */}
           <div style={{ position: "absolute", inset: 0, zIndex: 1 }}>
-            <PlasmaBg color={CYAN} speed={0.4} scale={1.1} opacity={0.55} direction="forward" mouseInteractive />
+            <PlasmaBg color={CYAN} speed={0.4} scale={1.1} opacity={isDark ? 0.55 : 0.75} direction="forward" mouseInteractive isDark={isDark} />
           </div>
           {/* Particles overlay */}
           <div style={{ position: "absolute", inset: 0, zIndex: 3, pointerEvents: "none", opacity: .7 }}>
-            <SvParticleField />
+            <SvParticleField isDark={isDark} />
           </div>
-          {/* Top / bottom fades */}
-          <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 80, background: `linear-gradient(to bottom,var(--cv-bg),transparent)`, zIndex: 4, pointerEvents: "none" }} />
-          <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 80, background: `linear-gradient(to bottom,transparent,var(--cv-bg))`, zIndex: 4, pointerEvents: "none" }} />
+          {/* Top / bottom fades — match page bg */}
+          <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 80, background: isDark ? `linear-gradient(to bottom,#080604,transparent)` : `linear-gradient(to bottom,#F0EBE0,transparent)`, zIndex: 4, pointerEvents: "none" }} />
+          <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 80, background: isDark ? `linear-gradient(to bottom,transparent,#080604)` : `linear-gradient(to bottom,transparent,#F0EBE0)`, zIndex: 4, pointerEvents: "none" }} />
         </div>
       </div>
 
       {/* Bottom fade into ticker */}
-      <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 60, background: `linear-gradient(to bottom,transparent,var(--cv-bg))`, zIndex: 5, pointerEvents: "none" }} />
+      <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 60, background: isDark ? `linear-gradient(to bottom,transparent,#080604)` : `linear-gradient(to bottom,transparent,#F0EBE0)`, zIndex: 5, pointerEvents: "none" }} />
     </section>
   );
 }
@@ -635,7 +676,6 @@ function HeroSection() {
 const SERVICE_DATES: Record<number, string> = { 1:"15.03.2024",2:"02.02.2024",3:"18.11.2023",4:"07.04.2024",5:"29.01.2024",6:"12.06.2023",7:"23.08.2023",8:"05.05.2024",9:"30.09.2023" };
 
 function GalleryItem({ service, index, entranceDelay = 0 }: { service: Service; index: number; entranceDelay?: number }) {
-  const svT = useSvT();
   const { ref: wrapRef, visible } = useInViewEntry(0.1);
   const imgParallaxRef = useParallaxRef(0.10);
   const [hovered, setHovered] = useState(false);
@@ -661,16 +701,16 @@ function GalleryItem({ service, index, entranceDelay = 0 }: { service: Service; 
         <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 2, background: `linear-gradient(to right,var(--cv-accent),var(--cv-accent-2))`, zIndex: 2, opacity: hovered ? 1 : 0, transition: "opacity .3s" }} />
       </div>
 
-      <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12, marginTop: 16, borderBottom: `1px solid rgba(255,255,255,.07)`, paddingBottom: 14 }}>
+      <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12, marginTop: 16, borderBottom: `1px solid var(--cv-border)`, paddingBottom: 14 }}>
         <div style={{ display: "flex", alignItems: "baseline", gap: 14, minWidth: 0 }}>
           <span style={{ fontFamily: MONO, fontSize: ".68rem", fontWeight: 700, color: "var(--cv-muted)", letterSpacing: ".06em", flexShrink: 0 }}>
             [{String(index).padStart(2, "0")}]
           </span>
-          <h3 className="sv-gallery-title" style={{ fontFamily: "'Archivo',sans-serif", fontSize: "clamp(.88rem,1.2vw,1rem)", fontWeight: 800, letterSpacing: ".04em", textTransform: "uppercase", color: hovered ? CYAN : "var(--cv-text)", margin: 0, transition: "color .3s", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+          <h3 className="sv-gallery-title" style={{ fontFamily: "'Archivo',sans-serif", fontSize: "clamp(.88rem,1.2vw,1rem)", fontWeight: 800, letterSpacing: ".04em", textTransform: "uppercase", color: hovered ? "var(--cv-accent)" : "var(--cv-text)", margin: 0, transition: "color .3s", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
             {service.title}
           </h3>
         </div>
-        <span style={{ fontFamily: MONO, fontSize: ".65rem", color: "rgba(255,255,255,.25)", letterSpacing: ".05em", flexShrink: 0, whiteSpace: "nowrap" }}>// {date}</span>
+        <span style={{ fontFamily: MONO, fontSize: ".65rem", color: "var(--cv-muted)", letterSpacing: ".05em", flexShrink: 0, whiteSpace: "nowrap", opacity: 0.5 }}>// {date}</span>
       </div>
       <p style={{ fontFamily: MONO, fontSize: ".62rem", color: "var(--cv-muted)", letterSpacing: ".1em", textTransform: "uppercase", margin: "10px 0 0", opacity: .6 }}>
         {service.tagline}
@@ -685,7 +725,7 @@ function EditorialGallery() {
   return (
     <section id="services" className="sv-gallery-section" style={{ background: "var(--cv-bg)", padding: "80px 48px 110px", position: "relative", overflow: "hidden" }}>
       {/* Grid texture */}
-      <div style={{ position: "absolute", inset: 0, backgroundImage: `repeating-linear-gradient(90deg,rgba(0,245,255,.015) 0,rgba(0,245,255,.015) 1px,transparent 1px,transparent 80px)`, pointerEvents: "none", zIndex: 0 }} />
+      <div style={{ position: "absolute", inset: 0, backgroundImage: `repeating-linear-gradient(90deg,rgba(201,168,76,.015) 0,rgba(201,168,76,.015) 1px,transparent 1px,transparent 80px)`, pointerEvents: "none", zIndex: 0 }} />
       {/* Glow accent */}
       <div style={{ position: "absolute", top: "-10%", right: "-5%", width: 500, height: 500, borderRadius: "50%", background: `radial-gradient(circle,var(--cv-accent)08,transparent 65%)`, filter: "blur(60px)", pointerEvents: "none", zIndex: 0 }} />
 
@@ -719,10 +759,9 @@ function EditorialGallery() {
 }
 
 /* ============================================================================
-   SERVICE CARDS — editorial two-column staggered layout (Tyres-style)
+   SERVICE CARDS — editorial two-column staggered layout
    ========================================================================== */
 function ServiceCard({ service, index, entranceDelay = 0 }: { service: Service; index: number; entranceDelay?: number }) {
-  const svT = useSvT();
   const { ref: wrapRef, visible } = useInViewEntry(0.08);
   const [hovered, setHovered] = useState(false);
 
@@ -741,7 +780,7 @@ function ServiceCard({ service, index, entranceDelay = 0 }: { service: Service; 
       {/* ── Image frame ── */}
       <div style={{
         position: "relative",
-        border: `1px solid ${hovered ? `var(--cv-accent)70` : "rgba(255,255,255,0.09)"}`,
+        border: `1px solid ${hovered ? `var(--cv-accent)70` : "var(--cv-border)"}`,
         overflow: "hidden",
         aspectRatio: "4/5",
         background: "var(--cv-bg2)",
@@ -812,7 +851,7 @@ function ServiceCard({ service, index, entranceDelay = 0 }: { service: Service; 
       <div style={{
         display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12,
         marginTop: 18,
-        borderBottom: `1px solid rgba(245,237,216,0.07)`,
+        borderBottom: `1px solid var(--cv-border)`,
         paddingBottom: 14,
       }}>
         <div style={{ display: "flex", alignItems: "baseline", gap: 14, minWidth: 0 }}>
@@ -823,14 +862,14 @@ function ServiceCard({ service, index, entranceDelay = 0 }: { service: Service; 
             fontFamily: "'Archivo', sans-serif",
             fontSize: "clamp(.9rem, 1.3vw, 1.05rem)",
             fontWeight: 800, letterSpacing: ".03em", textTransform: "uppercase",
-            color: hovered ? CYAN : "var(--cv-text)",
+            color: hovered ? "var(--cv-accent)" : "var(--cv-text)",
             margin: 0, transition: "color .3s",
             whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
           }}>
             {service.title}
           </h3>
         </div>
-        <span style={{ fontFamily: MONO, fontSize: ".62rem", color: "rgba(245,237,216,0.22)", letterSpacing: ".05em", flexShrink: 0, whiteSpace: "nowrap" }}>
+        <span style={{ fontFamily: MONO, fontSize: ".62rem", color: "var(--cv-muted)", letterSpacing: ".05em", flexShrink: 0, whiteSpace: "nowrap", opacity: 0.5 }}>
           {service.features[0]}
         </span>
       </div>
@@ -850,7 +889,6 @@ function ServiceCard({ service, index, entranceDelay = 0 }: { service: Service; 
 }
 
 function ServiceCardsSection() {
-  const svT = useSvT();
   const leftItems  = services.filter((_, i) => i % 2 === 0);
   const rightItems = services.filter((_, i) => i % 2 !== 0);
 
@@ -897,15 +935,14 @@ function ServiceCardsSection() {
 }
 
 /* ============================================================================
-   CTA SECTION — Tyres-style with Plasma + Aurora accents
+   CTA SECTION
    ========================================================================== */
-function CtaSection() {
-  const svT = useSvT();
+function CtaSection({ isDark = true }: { isDark?: boolean }) {
   return (
     <section style={{ background: "var(--cv-bg2)", position: "relative", overflow: "hidden" }}>
       {/* Plasma ambient */}
-      <div style={{ position: "absolute", inset: 0, zIndex: 0, opacity: 0.3, pointerEvents: "none" }}>
-        <PlasmaBg color={CYAN} speed={0.25} scale={1.3} opacity={0.4} direction="reverse" mouseInteractive={false} />
+      <div style={{ position: "absolute", inset: 0, zIndex: 0, opacity: isDark ? 0.3 : 0.18, pointerEvents: "none" }}>
+        <PlasmaBg color={CYAN} speed={0.25} scale={1.3} opacity={isDark ? 0.4 : 0.6} direction="reverse" mouseInteractive={false} isDark={isDark} />
       </div>
       {/* Grid lines */}
       <div style={{ position: "absolute", inset: 0, background: "repeating-linear-gradient(90deg,transparent 0,transparent 79px,rgba(201,168,76,.012) 80px)", pointerEvents: "none", zIndex: 1 }} />
@@ -946,7 +983,13 @@ function CtaSection() {
         <Reveal delay={150}>
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             {[["9", "Specialist services"], ["Same day", "Turnaround guaranteed"], ["10,000+", "Tyres in stock"]].map(([val, label]) => (
-              <div key={label} style={{ padding: "16px 24px", borderRadius: 14, background: "rgba(3,4,10,0.6)", backdropFilter: "blur(16px)", border: `1px solid var(--cv-border)`, display: "flex", alignItems: "center", gap: 16 }}>
+              <div key={label} style={{
+                padding: "16px 24px", borderRadius: 14,
+                background: isDark ? "rgba(3,4,10,0.6)" : "rgba(240,235,224,0.7)",
+                backdropFilter: "blur(16px)",
+                border: `1px solid var(--cv-border)`,
+                display: "flex", alignItems: "center", gap: 16,
+              }}>
                 <div style={{ fontFamily: "'Archivo',sans-serif", fontWeight: 900, fontSize: "clamp(1.2rem,2vw,1.6rem)", lineHeight: 1, background: `linear-gradient(to right,var(--cv-accent),var(--cv-accent-2))`, WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent", flexShrink: 0, minWidth: 56 }}>{val}</div>
                 <div style={{ fontFamily: "'Archivo',sans-serif", fontWeight: 700, fontSize: ".88rem", color: "var(--cv-text)" }}>{label}</div>
               </div>
@@ -986,18 +1029,18 @@ export default function Services() {
       <div className="sv-root" style={{ fontFamily: "'Archivo',sans-serif", minHeight: "100vh", overflowX: "hidden", WebkitFontSmoothing: "antialiased", ...cssVars, background: "var(--cv-bg)", color: "var(--cv-text)" }}>
         <style>{globalStyles}</style>
 
-        {/* Page-wide Plasma background (fixed, like Tyres) */}
-        <div style={{ position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none", opacity: isDark ? 1 : 0 }}>
-          <PlasmaBg color={CYAN} speed={0.3} scale={1.2} opacity={0.35} direction="forward" mouseInteractive />
+        {/* Page-wide Plasma background — dark mode only, hidden in light */}
+        <div style={{ position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none", opacity: isDark ? 1 : 0, transition: "opacity .4s" }}>
+          <PlasmaBg color={CYAN} speed={0.3} scale={1.2} opacity={0.35} direction="forward" mouseInteractive isDark={isDark} />
         </div>
 
         <ScrollProgressLine />
 
         <div style={{ position: "relative", zIndex: 1 }}>
-          <HeroSection />
-          <BrandTicker />
+          <HeroSection isDark={isDark} />
+          <BrandTicker isDark={isDark} />
           <ServiceCardsSection />
-          <CtaSection />
+          <CtaSection isDark={isDark} />
         </div>
       </div>
     </SvTheme.Provider>

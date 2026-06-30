@@ -384,7 +384,7 @@ function Hero() {
         <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: .6, duration: .6, ease: [.22,1,.36,1] }}
           style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", flexWrap: "wrap", gap: 22 }}>
           <p style={{ fontFamily: T.body, fontSize: "clamp(.9rem,1.1vw,1.05rem)", color: "var(--cv-muted)", lineHeight: 1.72, maxWidth: 380, margin: 0, fontWeight: 300 }}>
-            Jammu's trusted tyre specialists since 1998. Family-owned, expert-staffed, and committed to keeping every vehicle on the road safely.
+            Maharashtra's trusted tyre specialists since 1998. Family-owned, expert-staffed, and committed to keeping every vehicle on the road safely.
           </p>
           <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
             <Link to={ROUTES.tyres} className="cu-btn-amber" style={{ padding: "13px 26px", borderRadius: T.radius, fontSize: ".86rem", fontFamily: T.body }}>
